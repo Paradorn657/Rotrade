@@ -76,6 +76,10 @@ export default function Signup() {
         }
     };
 
+    const handleContinuewithGoogle =() =>{
+        console.log("google")
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg overflow-hidden w-full max-w-4xl">
@@ -83,7 +87,7 @@ export default function Signup() {
                 <div className="md:w-1/2 p-8">
                     <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create account</h2>
                     <div className="flex items-center justify-center mb-2">
-                        <button className="h-8 flex items-center px-4 py-2 border border-gray-300 rounded-lg focus:outline-none hover:bg-gray-100">
+                        <button onClick={handleContinuewithGoogle} className="h-8 flex items-center px-4 py-2 border border-gray-300 rounded-lg focus:outline-none hover:bg-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-4 h-4 mr-2 ">
                                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
                                 <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
