@@ -1,6 +1,15 @@
+import { getServerSession } from 'next-auth';
+import { signIn, useSession } from 'next-auth/react';
 import Head from 'next/head';
+import { authOptions } from '../../lib/authOptions';
 
-export default function Home() {
+export default async function Home() {
+
+
+  const session = await getServerSession(authOptions)
+  console.log("session =",session);
+
+ 
   return (
     <>
     <Head>
@@ -10,7 +19,7 @@ export default function Home() {
     </Head>
     <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-green-500">
       <div className="text-center text-white px-4 py-8">
-        <h1 className="text-5xl font-bold mb-4">Welcome to RoTrade!</h1>
+        <h1 className="text-5xl font-bold mb-4"> Welcome to RoTrade! {session?.user.name} </h1>
         <p className="text-xl mb-6">We are glad to have you here. Automate your Forex trading!</p>
         <div>
 
@@ -23,6 +32,8 @@ export default function Home() {
         </div>
       </div>
     </div>
+
+    
   </>
    
   );
