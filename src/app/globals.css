@@ -21,3 +21,11 @@ body {
 }
 
 
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* สำหรับ Internet Explorer */
+  scrollbar-width: none;     /* สำหรับ Firefox */
+}
