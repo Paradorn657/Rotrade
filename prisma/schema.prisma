@@ -13,11 +13,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model mt5Account {
+  MT5_id    String   @id
+  MT5_name  String
+  user_id   Int
+  api_token String
+  model_id  String?  // Nullable
+  status    String
+  balance   Float
+  user User @relation(fields: [user_id], references: [id]) // เชื่อมกับ User.id
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int          @id @default(autoincrement())
+  email     String       @unique
   name      String
   password  String?
-  create_at DateTime @default(now())
-  role      String   @default("user")
+  create_at DateTime      @default(now())
+  role      String        @default("user")
+
+  mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
 }

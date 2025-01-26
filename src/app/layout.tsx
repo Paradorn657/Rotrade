@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import SessionWrapper from "../components/SessionWrapper";
 import Foot from "../components/footter";
 import Sidebar, { SidebarItem } from '../app/sidebar'
-import { Home,Folder ,Settings  } from "lucide-react";
+import { Home,Folder ,Settings, LayoutDashboard  } from "lucide-react";
 
 
 const geistSans = Geist({
@@ -40,7 +40,7 @@ export default function RootLayout({
 
             <div className="flex flex-1 overflow-hidden">
               <Sidebar>
-                <SidebarItem icon={<Home />}  href="/" text="Home" />
+                <SidebarItem icon={<LayoutDashboard />}  href="/Dashboard" text="Dashboard" />
                 <SidebarItem icon={<Folder />} href="/folder" text="Projects" />
                 <hr className="my-3" />
                 <SidebarItem icon={<Settings />} href="/settings"text="Settings" />
@@ -48,7 +48,6 @@ export default function RootLayout({
 
               <div className="flex-1 overflow-y-auto">
                 {children}
-                <Foot/>
               </div>
               
             </div>

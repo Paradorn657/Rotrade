@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
         return {
-          id: existingUser.id + '',
+          id: existingUser.id.toString(),
           name: existingUser.name,
           email: existingUser.email,
           role: existingUser.role
@@ -44,34 +44,29 @@ export const authOptions: NextAuthOptions = {
   ],
   
   callbacks: {
-    // การจัดการ JWT token
     async jwt({ token, user }) {
       if (user) {
-        // กำหนดข้อมูลที่จำเป็นใน token
-        token.username = user.username || user.name;  // ใช้ชื่อผู้ใช้จาก user หรือ name
+        token.id = user.id || token.id; // ใช้ id จากฐานข้อมูล
+        token.username = user.username || user.name;
         token.email = user.email;
-        token.role = user.role || 'user';  // กำหนด role เริ่มต้นเป็น 'user'
+        token.role = user.role || 'user';
       }
-    
-      return token;  // ส่งคืน token ที่อัปเดต
-    }
-    ,
-    // การจัดการ session
+      return token;
+    },
+
     async session({ session, token }: { session: any; token: JWT }) {
-      // กำหนดข้อมูลใน session.user จาก token
       if (session.user) {
+        session.user.id = token.id || null; // ดึง id จาก token
         session.user.name = token.username;
         session.user.email = token.email;
         session.user.role = token.role;
       }
-    
-      return session;  // ส่งคืน session ที่อัปเดต
+      return session;
     },
 
-    // การจัดการการ signIn
     async signIn({ profile }) {
       if (profile?.email) {
-        await prisma.user.upsert({
+        const user = await prisma.user.upsert({
           where: {
             email: profile.email,
           },
@@ -84,8 +79,10 @@ export const authOptions: NextAuthOptions = {
             name: profile.name ?? "Unknown",
           },
         });
+
+        profile.id = user.id.toString(); // เพิ่ม id จากฐานข้อมูลใน profile
       }
-      return true; // อนุญาตให้ sign in
+      return true;
     },
   },
   

@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { signIn, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { authOptions } from '../../lib/authOptions';
+import Foot from '@/components/footter';
 
 export default async function Home() {
 
@@ -32,6 +33,7 @@ export default async function Home() {
         </div>
       </div>
     </div>
+    <Foot/>
 
     
   </>
