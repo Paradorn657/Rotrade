@@ -42,14 +42,29 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
-  
+
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id || token.id; // ใช้ id จากฐานข้อมูล
-        token.username = user.username || user.name;
-        token.email = user.email;
-        token.role = user.role || 'user';
+    async jwt({ token, user, account, profile }) {
+
+      if (account?.provider === 'google' && profile?.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: profile.email },
+        });
+
+        if (dbUser) {
+          token.id = dbUser.id; // ใช้ id จากฐานข้อมูลแทน Google ID
+          token.username = dbUser.name;
+          token.email = dbUser.email;
+          token.role = dbUser.role;
+          
+        }
+      } else {
+        if (user) {
+          token.id = user.id// ใช้ id จากฐานข้อมูล
+          token.username = user.name;
+          token.email = user.email;
+          token.role = user.role;
+        }
       }
       return token;
     },
@@ -79,12 +94,10 @@ export const authOptions: NextAuthOptions = {
             name: profile.name ?? "Unknown",
           },
         });
-
-        profile.id = user.id.toString(); // เพิ่ม id จากฐานข้อมูลใน profile
       }
       return true;
     },
   },
-  
+
   secret: process.env.NEXTAUTH_SECRET, // กำหนด secret สำหรับ JWT
 };

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "mt5Account" ALTER COLUMN "status" DROP NOT NULL,
+ALTER COLUMN "balance" DROP NOT NULL;

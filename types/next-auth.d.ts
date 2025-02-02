@@ -9,4 +9,8 @@ declare module "next-auth" {
       role:string
     };
   }
+
+  interface User extends DefaultUser {
+    role?: string; // ทำให้ role เป็น optional
+  }
 }

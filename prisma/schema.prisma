@@ -14,13 +14,14 @@ datasource db {
 }
 
 model mt5Account {
-  MT5_id    String   @id
+  MT5_id    Int     @id @default(autoincrement())
+  MT5_accountid    String   
   MT5_name  String
   user_id   Int
-  api_token String
+  api_token String  @unique
   model_id  String?  // Nullable
-  status    String
-  balance   Float
+  status    String? @default("Disconnect")
+  balance   Float?  @default(0)
   user User @relation(fields: [user_id], references: [id]) // เชื่อมกับ User.id
 }
 
@@ -31,6 +32,5 @@ model User {
   password  String?
   create_at DateTime      @default(now())
   role      String        @default("user")
-
   mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
 }
