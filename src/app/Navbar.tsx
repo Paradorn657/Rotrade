@@ -3,6 +3,7 @@ import { Disclosure, DisclosureButton, Menu, MenuButton, MenuItem, MenuItems } f
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { CircleUser } from 'lucide-react';
 
 export default function Navbar() {
     const { data: session } = useSession() // ใช้ useSession แทน getServerSession
@@ -38,7 +39,7 @@ export default function Navbar() {
                             <div>
                                 <button className="btn btn-primary btn-sm mr-5 hover:text-white hover:bg-blue-300">
                                     <Link href="/signin">Login</Link>
-                                    </button>
+                                </button>
                                 <button className="btn btn-primary btn-sm mr-5 hover:text-white hover:bg-blue-300">
                                     <Link href="/signup">Sign up</Link>
                                 </button>
@@ -58,15 +59,13 @@ export default function Navbar() {
                                 {/* Profile dropdown */}
                                 <Menu as="div" className="relative ml-3">
                                     <div>
-                                        <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                                            <span className="absolute -inset-1.5" />
+                                        <MenuButton className="relative flex items-center px-3 py-2 rounded-full bg-gray-800 text-sm text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-200">
                                             <span className="sr-only">Open user menu</span>
-                                            <img
-                                                alt=""
-                                                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                                                className="size-8 rounded-full"
-                                            />
+                                            <CircleUser className="w-8 h-8 rounded-full border-2 border-gray-600" />
+                                            <span className="ml-4">{session.user.name}</span>
                                         </MenuButton>
+
+
                                     </div>
                                     <MenuItems
                                         transition
@@ -74,7 +73,7 @@ export default function Navbar() {
                                     >
                                         <MenuItem>
                                             <a
-                                                href="#"
+                                                href="/profile"
                                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
                                             >
                                                 Your Profile

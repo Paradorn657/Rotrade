@@ -33,7 +33,8 @@ export const authOptions: NextAuthOptions = {
           id: existingUser.id.toString(),
           name: existingUser.name,
           email: existingUser.email,
-          role: existingUser.role
+          role: existingUser.role,
+          create_at:existingUser.create_at
         }
       }
     }),
@@ -44,28 +45,52 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account, profile ,trigger}) {
 
-      if (account?.provider === 'google' && profile?.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: profile.email },
-        });
+        if (account?.provider === 'google' && profile?.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: profile.email },
+          });
 
-        if (dbUser) {
-          token.id = dbUser.id; // ใช้ id จากฐานข้อมูลแทน Google ID
-          token.username = dbUser.name;
-          token.email = dbUser.email;
-          token.role = dbUser.role;
-          
+
+          if (dbUser) {
+            token.id = dbUser.id; // ใช้ id จากฐานข้อมูลแทน Google ID
+            token.username = dbUser.name;
+            token.email = dbUser.email;
+            token.role = dbUser.role;
+            token.provider = "google"
+            token.createdDate = dbUser.create_at
+
+          }
+        } else {
+          if (user) {
+            console.log(user)
+            token.id = user.id// ใช้ id จากฐานข้อมูล
+            token.username = user.name;
+            token.email = user.email;
+            token.role = user.role;
+            token.provider = "credentials"
+            token.createdDate = user.create_at
         }
-      } else {
-        if (user) {
-          token.id = user.id// ใช้ id จากฐานข้อมูล
-          token.username = user.name;
-          token.email = user.email;
-          token.role = user.role;
         }
-      }
+
+        if (trigger === 'update') {
+          const refreshedUser = await prisma.user.findUnique({
+            where: { id: Number(token.id )},
+          });
+        
+          if (refreshedUser) {
+            token.id = token.id;
+            token.username = refreshedUser.name;
+            token.email = refreshedUser.email;
+            token.role = refreshedUser.role;
+            token.createdDate = refreshedUser.create_at;
+        
+            // เก็บข้อมูลบางอย่างจาก token เดิม
+            token.image = token.image;
+            token.provider = token.provider;
+          }
+        }
       return token;
     },
 
@@ -75,6 +100,8 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.username;
         session.user.email = token.email;
         session.user.role = token.role;
+        session.user.provider = token.provider;
+        session.user.createDate = token.createdDate
       }
       return session;
     },

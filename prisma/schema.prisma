@@ -19,10 +19,12 @@ model mt5Account {
   MT5_name  String
   user_id   Int
   api_token String  @unique
-  model_id  String?  // Nullable
+  model_id  Int?  // Nullable
   status    String? @default("Disconnect")
   balance   Float?  @default(0)
+  signal_status String   @default("OFF")
   user User @relation(fields: [user_id], references: [id]) // เชื่อมกับ User.id
+  model Model? @relation(fields: [model_id], references: [Model_id])
 }
 
 model User {
@@ -32,5 +34,15 @@ model User {
   password  String?
   create_at DateTime      @default(now())
   role      String        @default("user")
+  mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
+  
+}
+
+model Model{
+  Model_id   Int         @id @default(autoincrement())
+  name String
+  version Float
+  Update_at DateTime     @default(now())
+  numberofuse Int @default(0)
   mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
 }

@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import SessionWrapper from "../components/SessionWrapper";
 import Foot from "../components/footter";
 import Sidebar, { SidebarItem } from '../app/sidebar'
-import { Radio,Folder ,Settings, LayoutDashboard  } from "lucide-react";
+import { Radio,History ,Settings, LayoutDashboard,SlidersHorizontal  } from "lucide-react";
 
 
 const geistSans = Geist({
@@ -41,7 +41,9 @@ export default function RootLayout({
             <div className="flex flex-1 overflow-hidden">
               <Sidebar>
                 <SidebarItem icon={<LayoutDashboard />}  href="/Dashboard" text="Dashboard" />
-                <SidebarItem icon={<Radio />} href="/robot" text="MT5 Signal Bot" />
+                <SidebarItem icon={<Radio />} href="/robot" text="MT5 Signal Bot" /> 
+                <SidebarItem icon={<SlidersHorizontal />} href="/control_panel" text="Control Panel" />
+                <SidebarItem icon={<History />} href="/trade_history" text="Trade History" />
                 <hr className="my-3" />
                 <SidebarItem icon={<Settings />} href="/settings"text="Settings" />
               </Sidebar>

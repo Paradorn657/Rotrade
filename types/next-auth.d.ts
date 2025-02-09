@@ -7,10 +7,15 @@ declare module "next-auth" {
       email: string;
       name?: string;
       role:string
+      image:string
+      provider:string
+      createDate:DateTime
     };
   }
 
   interface User extends DefaultUser {
     role?: string; // ทำให้ role เป็น optional
+    create_at:DateTime
   }
+
 }
