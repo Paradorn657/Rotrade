@@ -1,18 +1,46 @@
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { authOptions, authSession } from "../../../../lib/authOptions";
+import { getSession } from "next-auth/react";
+import { prisma } from "../../../../lib/prisma";
 
 let tradeHistory: any[] = [];
+let createBillData: any; 
 
 export async function POST(req: NextRequest) {
+    
     try {
-        const trades = await req.json();
+        const {token,orders, deals} = await req.json();
 
-        if (!trades.orders || !trades.deals) {
+        console.log(token)
+
+        if (!orders|| !deals) {
             return NextResponse.json({ error: "Invalid trade data" }, { status: 400 });
         }
 
-        tradeHistory.push(trades); // เก็บข้อมูลเพิ่ม (ถ้าต้องการให้เก็บหลายรายการ)
+        tradeHistory = [{ orders, deals}]; // เขียนทับตัวเก่า
 
         console.log("🔹 New Trade History Received:", tradeHistory);
+
+        //พอได้รับ history แล้วคำนวนเลย
+
+        const user = await prisma.mt5Account.findUnique({
+            where: {
+                api_token:token
+            }
+        })
+
+        const createBillResponse = await fetch("http://localhost:3000/api/create-bills", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ userId: user?.user_id }),
+        });
+
+        createBillData = await createBillResponse.json();
+        console.log("🧾 Bill Created:");
+
 
         return NextResponse.json({ success: true, message: "Trade history updated" }, { status: 200 });
     } catch (error) {

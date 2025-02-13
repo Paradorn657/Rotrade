@@ -1,4 +1,4 @@
-import { NextAuthOptions } from "next-auth"
+import { getServerSession, NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -128,3 +128,7 @@ export const authOptions: NextAuthOptions = {
 
   secret: process.env.NEXTAUTH_SECRET, // กำหนด secret สำหรับ JWT
 };
+
+export const authSession = async () =>{
+  return getServerSession(authOptions);
+}

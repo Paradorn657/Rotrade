@@ -1,13 +1,22 @@
 "use client";
-
 import { randomBytes } from "crypto";
 import { useEffect, useState } from "react";
-import { Dropdown } from "flowbite-react";
-import { Clipboard } from "flowbite-react";
+import { Doughnut } from 'react-chartjs-2';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { RefreshCcw } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js/auto';
-import { Doughnut } from 'react-chartjs-2';
-
 
 export function Component({ api_token }: { api_token: string }) {
   const displayedToken = api_token.length > 10 ? api_token.slice(0, 10) + " ************" : api_token;
@@ -26,7 +35,6 @@ export function Component({ api_token }: { api_token: string }) {
           disabled
           readOnly
         />
-        <Clipboard.WithIcon valueToCopy={api_token} />
       </div>
     </div>
   );
@@ -36,12 +44,11 @@ const MT5Dashboard = ({ email }: { email: string }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [token, setToken] = useState("");
   const [mt5InstanceId, setMt5InstanceId] = useState("");
-
   const [mt5Id, setMt5Id] = useState("");
   const [mt5Name, setMt5Name] = useState("");
 
   function generateRandomToken(length: number = 32): string {
-    return randomBytes(length).toString('hex'); // สร้าง token ที่มีความยาว 32 ตัวอักษรในรูปแบบ hex
+    return randomBytes(length).toString('hex');
   }
 
   const handleGenerateToken = async () => {
@@ -69,14 +76,9 @@ const MT5Dashboard = ({ email }: { email: string }) => {
       return;
     }
 
-    const data = {
-      mt5Id,
-      mt5Name,
-      token
-    };
+    const data = { mt5Id, mt5Name, token };
 
     try {
-      // เรียก API เพื่อเพิ่มข้อมูลลงในฐานข้อมูล
       const response = await fetch('/api/create-Mt5', {
         method: 'POST',
         headers: {
@@ -90,15 +92,10 @@ const MT5Dashboard = ({ email }: { email: string }) => {
       if (!response.ok) {
         alert(result.message || 'Failed to create Account');
       } else {
-        console.log('Successfully added to database:', result);
-
-        // แสดงข้อความหรือการดำเนินการอื่น ๆ เมื่อสำเร็จ
         alert("Data successfully added!");
       }
-
     } catch (error) {
-      console.error('Error creating data:', error);
-      alert("MT5 ID ALREADY IN USE");
+      alert("Error creating data: MT5 ID ALREADY IN USE");
     }
   };
 
@@ -110,7 +107,6 @@ const MT5Dashboard = ({ email }: { email: string }) => {
     try {
       const response = await fetch("/api/get-mt5");
       if (!response.ok) throw new Error("Failed to fetch accounts");
-
       const data = await response.json();
       setAccounts(data);
     } catch (error) {
@@ -122,7 +118,6 @@ const MT5Dashboard = ({ email }: { email: string }) => {
 
   useEffect(() => {
     fetchAccounts();
-
   }, []);
 
   const centerTextPlugin = {
@@ -133,21 +128,21 @@ const MT5Dashboard = ({ email }: { email: string }) => {
       const fontSize = (height / 314).toFixed(2);
       ctx.font = `${fontSize}em sans-serif`;
       ctx.textBaseline = "middle";
-  
+
       const text = "Number of assets: 4";
       const textX = Math.round((width - ctx.measureText(text).width) / 2);
       const textY = height / 2;
-  
+
       ctx.fillStyle = "black"; // ✅ สีตัวอักษร
       ctx.fillText(text, textX, textY);
       ctx.save();
     },
   };
-  
+
 
   ChartJS.register(ArcElement, Tooltip, Legend);
   const options = {
-    cutout:"80%",
+    cutout: "80%",
     responsive: true,          // ทำให้ Chart ปรับตามหน้าจอ
     maintainAspectRatio: false, // ปิดการคงอัตราส่วน (ทำให้ใช้ height & width ได้)
     plugins: {
@@ -163,47 +158,87 @@ const MT5Dashboard = ({ email }: { email: string }) => {
       {/* Top Section (60%) */}
       <div className="flex-1 bg-gray-200 flex items-center justify-center">
         <div className="w-60 h-60">
-        <Doughnut
-        data={
-          {labels: [
-            'Red',
-            'Blue',
-            'Yellow'
-          ],
-          datasets: [{
-            label: 'My First Dataset',
-            data: [300, 50, 100],
-            backgroundColor: [
-              'rgb(255, 99, 132)',
-              'rgb(54, 162, 235)',
-              'rgb(255, 205, 86)'
-            ],
-            hoverOffset: 4,
-            borderWidth:0
-          }]}
-          
-        }
-        options={options}
-        plugins={[centerTextPlugin]}
-        />
+          <Doughnut
+            data={{
+              labels: ['Red', 'Blue', 'Yellow'],
+              datasets: [{
+                label: 'My First Dataset',
+                data: [300, 50, 100],
+                backgroundColor: ['rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)'],
+                borderWidth: 0,
+              }],
+            }}
+            options={options}
+            plugins={[centerTextPlugin]}
+          />
         </div>
-
       </div>
 
       {/* Bottom Section (40%) */}
       <div className="h-[45%] bg-white relative p-7">
         <div className="bg-white rounded-lg shadow-md p-6 relative">
-          <div className="flex absolute top-4 right-4"> {/* Button positioning */}
-          <button
-            >
-             <RefreshCcw onClick={fetchAccounts} className="mr-7"/>
-          </button>
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-            >
-              Add MT5 Account
+          <div className="flex absolute top-4 right-4">
+            <button>
+              <RefreshCcw onClick={fetchAccounts} className="mr-7" />
             </button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" >Add MT5 Account</Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Connect Metatrader Account</SheetTitle>
+                  <SheetDescription>
+                    Enter your MT5 details to generate a token.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="mt5Id" className="text-left">MT5 ID</Label>
+                    <Input
+                      id="mt5Id"
+                      value={mt5Id}
+                      onChange={(e) => setMt5Id(e.target.value)}
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="mt5Name" className="text-left">MT5 Name</Label>
+                    <Input
+                      id="mt5Name"
+                      value={mt5Name}
+                      onChange={(e) => setMt5Name(e.target.value)}
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <p className="text-sm text-gray-700">
+                    Token will be generated for: <b>{email}</b>
+                  </p>
+                  <Button onClick={handleGenerateToken}>Generate Token</Button>
+                </div>
+
+                {token && (
+                  <>
+                    <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
+                      <h3 className="text-sm font-semibold text-gray-800 mb-2">Generated Token:</h3>
+                      <p className="text-xs break-words"><b>Token:</b> {token}</p>
+                    </div>
+                    <SheetFooter>
+                      <SheetClose asChild>
+                        <Button
+                          className="mt-7"
+                          onClick={handleCreate}
+                          >
+                          Create
+                        </Button>
+                      </SheetClose>
+                    </SheetFooter>
+                  </>
+                )}
+              </SheetContent>
+            </Sheet>
           </div>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Metatrader Accounts</h2>
           {loading ? (
@@ -222,37 +257,20 @@ const MT5Dashboard = ({ email }: { email: string }) => {
                   </tr>
                 </thead>
                 <tbody>
-                {accounts
-                    .slice() // Clone array เพื่อไม่ให้เปลี่ยนค่า accounts ต้นฉบับ
-                    .sort((a:any, b) => (a.status === "Connected" ? -1 : 1)) // ให้ "Connected" มาก่อน
-                    .map((account: any, index) => (
-                      <tr key={account.MT5_id} className="hover:bg-gray-100 transition-all duration-300">
-                        <td><img className="ml-15 w-8" src="https://www.infinox.com/global/wp-content/uploads/sites/5/2023/06/MT5-hero-pic.webp" alt="คำอธิบายรูปภาพ" /></td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{account.MT5_accountid}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{account.MT5_name}</td>
-                        <td className="px-6 py-4 truncate max-w-[200px] text-sm text-gray-800"><Component api_token={account.api_token} /></td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${account.status === "Connected" ? "bg-[#00FF00] text-black" : "bg-red-500 text-white"}`}>
-                            {account.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{account.balance.toFixed(2)}</td>
-                        <td>
-                          <Dropdown label="Dropdown button" dismissOnClick={false} renderTrigger={() => (
-                            <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 4 15">
-                              <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
-                            </svg>
-                          )}>
-                            <Dropdown.Item>Dashboard</Dropdown.Item>
-                            <Dropdown.Item>Settings</Dropdown.Item>
-                            <Dropdown.Item>Earnings</Dropdown.Item>
-                            <Dropdown.Item>Sign out</Dropdown.Item>
-                          </Dropdown>
-                        </td>
-                      </tr>
-                    ))
-                  }
-
+                  {accounts.map((account: any) => (
+                    <tr key={account.MT5_id} className="hover:bg-gray-100 transition-all duration-300">
+                      <td><img className="ml-15 w-8" src="https://www.infinox.com/global/wp-content/uploads/sites/5/2023/06/MT5-hero-pic.webp" alt="MT5" /></td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{account.MT5_accountid}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{account.MT5_name}</td>
+                      <td className="px-6 py-4 truncate max-w-[200px] text-sm text-gray-800"><Component api_token={account.api_token} /></td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${account.status === "Connected" ? "bg-[#00FF00] text-black" : "bg-red-500 text-white"}`}>
+                          {account.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{account.balance.toFixed(2)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -261,78 +279,6 @@ const MT5Dashboard = ({ email }: { email: string }) => {
           )}
         </div>
       </div>
-
-      {/* Right Sidebar */}
-      {isSidebarOpen && (
-        <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 flex flex-col p-4">
-
-
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Connect Metatrader Account</h2>
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="text-gray-600 hover:text-gray-800"
-            >
-              ✕
-            </button>
-          </div>
-          <div className="flex flex-col gap-4">
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">MT5 ID</label>
-              <input
-
-                value={mt5Id}
-                onChange={(e) => setMt5Id(e.target.value)}
-                type="text"
-                id="first_name"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="ID"
-                required />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">MT5 NAME</label>
-              <input
-                value={mt5Name}
-                onChange={(e) => setMt5Name(e.target.value)}
-                type="text" id="first_name"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name" required />
-            </div>
-
-            <p className="text-sm text-gray-700">
-              Token will be generated for : <b>{email}</b>
-            </p>
-            <button
-              onClick={handleGenerateToken}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-            >
-              Generate Token
-            </button>
-          </div>
-
-          {token && (
-            <>
-              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
-                <h3 className="text-sm font-semibold text-gray-800 mb-2">Generated Token:</h3>
-                <p className="text-xs break-words">
-                  <b>Token:</b> {token}
-                </p>
-                {/* <p className="text-xs mt-2">
-                <b>MT5 Instance ID:</b> {mt5InstanceId}
-              </p> */}
-
-              </div>
-              <button type="button"
-                onClick={handleCreate}
-                className="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200
-               dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center  mb-2 mt-4">
-                Create</button>
-            </>
-
-          )}
-
-
-        </div>
-      )}
     </div>
   );
 };

@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     console.log(token)
 
     const mt5account = await prisma.mt5Account.findUnique({
-      where:{api_token:token,MT5_accountid:mt5_id}
+      where:{api_token:token,MT5_accountid:String(mt5_id)}
     })
     if (!mt5account) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });

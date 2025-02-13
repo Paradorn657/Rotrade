@@ -191,12 +191,14 @@ export default function Profile() {
                     </div>
 
                     {/* Save Button */}
+                    {!isGoogleLogin && (
                     <div className="flex items-center space-x-4 mt-6">
                         <button type="submit" className="h-10 flex items-center text-white bg-blue-700 hover:bg-blue-400 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5">
                             <Pocket />
                             <span className="ml-2">Change</span>
                         </button>
                     </div>
+                    )}
                 </form>
             </div >
         </section >

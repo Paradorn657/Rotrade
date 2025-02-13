@@ -36,6 +36,8 @@ model User {
   role      String        @default("user")
   mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
   
+
+  Bills Bills[]
 }
 
 model Model{
@@ -45,4 +47,16 @@ model Model{
   Update_at DateTime     @default(now())
   numberofuse Int @default(0)
   mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
+
+}
+
+model Bills{
+  Bill_id Int @id @default(autoincrement())
+  User_id Int
+  Billing_startdate DateTime
+  Billing_enddate DateTime
+  status String? @default("Unpaid")
+  Balance Float
+
+  user User @relation(fields: [User_id], references: [id])
 }
