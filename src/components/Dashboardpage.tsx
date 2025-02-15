@@ -2,6 +2,7 @@
 import { randomBytes } from "crypto";
 import { useEffect, useState } from "react";
 import { Doughnut } from 'react-chartjs-2';
+import { Clipboard } from "flowbite-react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,7 +21,6 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js/auto';
 
 export function Component({ api_token }: { api_token: string }) {
   const displayedToken = api_token.length > 10 ? api_token.slice(0, 10) + " ************" : api_token;
-
   return (
     <div className="grid w-52 max-w-64">
       <div className="relative">
@@ -35,6 +35,7 @@ export function Component({ api_token }: { api_token: string }) {
           disabled
           readOnly
         />
+        <Clipboard.WithIcon valueToCopy={api_token} />
       </div>
     </div>
   );

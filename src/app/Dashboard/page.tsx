@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
 
-import MT5Dashboard from "../components/Dashboardpage";
+import MT5Dashboard from "@/components/Dashboardpage";
 import { authOptions } from "../../../lib/authOptions";
 
 export default async function Page() {

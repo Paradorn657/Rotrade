@@ -30,7 +30,7 @@ const TradeHistory = () => {
     useEffect(() => {
         const fetchTrades = async () => {
             try {
-                const response = await fetch("/api/get-history");
+                const response = await fetch(""); //หน้านี้ไม่ใช้แล้ว
                 const data = await response.json();
 
                 const allOrders = data.flatMap(item => item.orders || []);

@@ -4,7 +4,7 @@ import { authOptions, authSession } from "../../../../lib/authOptions";
 import { getSession } from "next-auth/react";
 import { prisma } from "../../../../lib/prisma";
 
-let tradeHistory: any[] = [];
+let tradeHistory: any[] = []; //{token,history} 
 let createBillData: any; 
 
 export async function POST(req: NextRequest) {

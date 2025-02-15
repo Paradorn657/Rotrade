@@ -43,7 +43,7 @@ export default function RootLayout({
                 <SidebarItem icon={<LayoutDashboard />}  href="/Dashboard" text="Dashboard" />
                 <SidebarItem icon={<Radio />} href="/robot" text="MT5 Signal Bot" /> 
                 <SidebarItem icon={<SlidersHorizontal />} href="/control_panel" text="Control Panel" />
-                <SidebarItem icon={<History />} href="/trade_history" text="Trade History" />
+                {/* <SidebarItem icon={<History />} href="/trade_history" text="Trade History" /> */}
                 <SidebarItem icon={<ReceiptText/>} href="/Bills" text="Bills" />
                 <hr className="my-3" />
                 <SidebarItem icon={<Settings />} href="/settings"text="Settings" />
