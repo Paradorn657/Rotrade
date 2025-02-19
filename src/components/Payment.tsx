@@ -41,6 +41,8 @@ export function CheckoutPage({ amount }: { amount: number }) {
 
     if (error) {
       setErrorMessage(error.message);
+    }else{
+      //อัปเดต
     }
 
     setLoading(false);

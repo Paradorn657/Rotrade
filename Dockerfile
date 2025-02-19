@@ -12,7 +12,7 @@ RUN npm install
 
 
 # Build แอปพลิเคชัน Next.js
-RUN npm run build
+# RUN npm run build
 
 # เปิดพอร์ตสำหรับ container
 EXPOSE 3000

@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -5,7 +6,10 @@ import Navbar from "./Navbar";
 import SessionWrapper from "../components/SessionWrapper";
 import Foot from "../components/footter";
 import Sidebar, { SidebarItem } from '../app/sidebar'
-import { Radio,History ,Settings, LayoutDashboard,SlidersHorizontal ,ReceiptText } from "lucide-react";
+import { Radio,History ,Settings, LayoutDashboard,SlidersHorizontal ,ReceiptText, Shield, Users } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../lib/authOptions";
+import { useSession } from "next-auth/react";
 
 
 const geistSans = Geist({
@@ -24,13 +28,9 @@ export const metadata: Metadata = {
 };
 
 
-
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) 
+{
+  const session = await getServerSession(authOptions);
   return (
     <SessionWrapper>
       <html lang="en">
@@ -40,13 +40,14 @@ export default function RootLayout({
 
             <div className="flex flex-1 overflow-hidden">
               <Sidebar>
-                <SidebarItem icon={<LayoutDashboard />}  href="/Dashboard" text="Dashboard" />
-                <SidebarItem icon={<Radio />} href="/robot" text="MT5 Signal Bot" /> 
-                <SidebarItem icon={<SlidersHorizontal />} href="/control_panel" text="Control Panel" />
+                <SidebarItem icon={<LayoutDashboard />}  href="/Dashboard" text="Dashboard" session={session} />
+                <SidebarItem icon={<Radio />} href="/robot" text="MT5 Signal Bot" session={session} /> 
+                <SidebarItem icon={<SlidersHorizontal />} href="/control_panel" text="Control Panel" session={session}/>
                 {/* <SidebarItem icon={<History />} href="/trade_history" text="Trade History" /> */}
-                <SidebarItem icon={<ReceiptText/>} href="/Bills" text="Bills" />
+                <SidebarItem icon={<ReceiptText/>} href="/Bills" text="Bills" session={session} />
+                <SidebarItem icon={<Shield />} href="/admin_manager" text="Admin"  session={session} forRole="admin"/>
                 <hr className="my-3" />
-                <SidebarItem icon={<Settings />} href="/settings"text="Settings" />
+                <SidebarItem icon={<Settings />} href="/settings"text="Settings"  session={session}/>
               </Sidebar>
 
               <div className="flex-1 overflow-y-auto">

@@ -5,6 +5,7 @@ import { Url } from "next/dist/shared/lib/router/router";
 import Link from "next/link";
 import { useContext, createContext, useState, ReactNode, useEffect } from "react";
 import { usePathname } from 'next/navigation';
+import { Session } from "next-auth";
 
 // ระบุชนิดข้อมูลสำหรับ SidebarContext
 interface SidebarContextType {
@@ -79,15 +80,24 @@ interface SidebarItemProps {
   alert?: boolean;
   href: Url;
   onClick?: () => void; // Optional click handler
-}
+  session: Session | null;
+  forRole?: string; // เมนูนี้สำหรับ role อะไร
+  }
 
 // SidebarItem Component
-export function SidebarItem({ icon, text, active, alert, href, onClick }: SidebarItemProps) {
+  export function SidebarItem({ icon, text, active, alert, href, onClick, session, forRole}: SidebarItemProps) {
   const context = useContext(SidebarContext);
   const expanded = context?.expanded ?? true;
 
   const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
+
+   // ⬇️ ถ้ามีการกำหนด forRole มา ให้ตรวจสอบ
+   if (forRole && session?.user?.role !== forRole) {
+    // console.log("layout:",session)
+    // console.log("สร้างเฉพาะ",text,"for",forRole);
+    return null;
+  }
 
   // Use useEffect to set isClient to true once the component has mounted
   useEffect(() => {
