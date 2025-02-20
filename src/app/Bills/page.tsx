@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { toast, Toaster } from 'react-hot-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,6 +68,10 @@ const BillingList = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+
+  const { data: session  } = useSession();
+  console.log("session Bills=",session);
+
 
   useEffect(() => {
     const fetchBillDetails = async () => {
@@ -470,7 +474,7 @@ const BillingList = () => {
                     currency: "usd",
                   }}
                 >
-                  <CheckoutPage amount={Math.round(selectedBill.bill.Balance * 100)} />
+                  <CheckoutPage amount={Math.round(selectedBill.bill.Balance * 100)} usersession={session!} selectedbill={selectedBill}/>
                 </Elements>
               </div>
 

@@ -1,19 +1,24 @@
 'use client'
 
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { BillData, Session } from 'next-auth';
 import { useEffect, useState } from 'react';
+
 
 if (process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY === undefined) {
   throw new Error("cant find stripe public key");
 }
 
-export function CheckoutPage({ amount }: { amount: number }) {
+export function CheckoutPage({ amount,usersession,selectedbill }: { amount: number,usersession:Session,selectedbill:BillData }) {
   const stripe = useStripe();
   const elements = useElements();
 
   const [errorMessage, setErrorMessage] = useState<string>();
   const [clientSecret, setClientSecret] = useState("");
   const [loading, setLoading] = useState(false);
+
+  console.log("session at checkout",usersession)
+  console.log("selected bill at checkout",selectedbill)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,7 +40,7 @@ export function CheckoutPage({ amount }: { amount: number }) {
       elements,
       clientSecret,
       confirmParams: {
-        return_url: "http://localhost:3000/"
+        return_url: "http://localhost:3000/paymentsuccess"
       }
     });
 
@@ -43,6 +48,7 @@ export function CheckoutPage({ amount }: { amount: number }) {
       setErrorMessage(error.message);
     }else{
       //อัปเดต
+      
     }
 
     setLoading(false);
@@ -54,7 +60,7 @@ export function CheckoutPage({ amount }: { amount: number }) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ amount: amount })
+      body: JSON.stringify({ amount: amount,usersession:usersession,selectedbill:selectedbill })
     })
       .then((res) => res.json())
       .then((data) => setClientSecret(data.clientSecret));

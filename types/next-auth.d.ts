@@ -18,4 +18,20 @@ declare module "next-auth" {
     create_at:DateTime
   }
 
+  interface BillData {
+    bill: Bill;
+    deals: Deal[];
+    totalProfit: number;
+    serviceFee: number;
+  }
+  
+  interface Bill {
+    Bill_id: number;
+    User_id: number;
+    Billing_startdate: string;
+    Billing_enddate: string;
+    status: string;
+    Balance: number;
+  }
+
 }

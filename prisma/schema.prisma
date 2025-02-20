@@ -59,7 +59,6 @@ model Bills{
   Balance Float
   Deals_count        Int
   dealsData          Json   // เพิ่ม field นี้เพื่อเก็บ JSON ของ filteredDeals (optional)
-  
 
   user User @relation(fields: [User_id], references: [id])
 }
