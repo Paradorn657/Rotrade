@@ -35,8 +35,6 @@ model User {
   create_at DateTime      @default(now())
   role      String        @default("user")
   mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
-  
-
   Bills Bills[]
 }
 

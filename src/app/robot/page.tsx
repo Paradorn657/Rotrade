@@ -5,6 +5,9 @@ import { toast, Toaster } from 'react-hot-toast';
 import {Clock, Users, Bot } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSession } from 'next-auth/react';
+import LoginRedirect from '@/components/loginredirect';
+import SimpleSpinner from '@/components/Loadingspinner';
 
 interface Bot {
   Model_id: number;
@@ -95,6 +98,17 @@ const BotPresets = () => {
       toast.error("Please select an account");
     }
   };
+
+
+  const { status, data: session } = useSession();
+
+  if (status === "loading") {
+    return <SimpleSpinner />;
+  }
+
+  if(!session){
+    return(<LoginRedirect/>)
+  }else{
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -205,5 +219,7 @@ const BotPresets = () => {
     </div>
   );
 };
+
+}
 
 export default BotPresets;

@@ -1,19 +1,28 @@
+"use client"
 import { getServerSession } from "next-auth/next";
 
 import MT5Dashboard from "@/components/Dashboardpage";
 import { authOptions } from "../../../lib/authOptions";
+import LoginRedirect from "@/components/loginredirect";
+import { useSession } from "next-auth/react";
+import SimpleSpinner from "@/components/Loadingspinner";
 
-export default async function Page() {
-  const session = await getServerSession(authOptions);
+export default function Page() {
+  const { status, data: session } = useSession();
 
-  // ตรวจสอบว่ามี session หรือไม่
+  if (status === "loading") {
+    return <SimpleSpinner />;
+  }
+
+
+  // // ตรวจสอบว่ามี session หรือไม่
   if (!session?.user?.email) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg text-red-500">No authenticated user found!</p>
-      </div>
+      <LoginRedirect />
     );
   }
+
+
 
   return <MT5Dashboard email={session.user.email} />;
 }

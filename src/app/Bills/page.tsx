@@ -20,6 +20,8 @@ import { Badge } from "@/components/ui/badge";
 import { Elements } from '@stripe/react-stripe-js';
 import { CheckoutPage } from '@/components/Payment';
 import { loadStripe } from '@stripe/stripe-js';
+import LoginRedirect from '@/components/loginredirect';
+import SimpleSpinner from '@/components/Loadingspinner';
 
 interface Deal {
   dealTicket: number;
@@ -69,8 +71,8 @@ const BillingList = () => {
 
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
-  const { data: session  } = useSession();
-  console.log("session Bills=",session);
+  const { status, data: session } = useSession();
+  console.log("session Bills=", session);
 
 
   useEffect(() => {
@@ -78,7 +80,6 @@ const BillingList = () => {
       try {
         const session = await getSession();
         if (!session?.user?.id) {
-          console.error("User not found in session");
           return;
         }
 
@@ -129,6 +130,15 @@ const BillingList = () => {
     })
     : [];
 
+  if (status === "loading") {
+    return <SimpleSpinner />;
+  }
+
+
+  if (!session) {
+    return (<LoginRedirect />)
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-3">
@@ -154,14 +164,17 @@ const BillingList = () => {
 
   const handlePayment = (Bill: BillData) => {
     setSelectedBill(Bill);
-    if(dialogOpen){
+    if (dialogOpen) {
       setDialogOpen(false);
-    }else{
+    } else {
       setDialogOpen(true);
     }
     // เปิด Payment Modal
     setPaymentModalOpen(true);
   };
+
+
+
 
   return (
     <div className=" max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -282,7 +295,7 @@ const BillingList = () => {
                               variant="default"
                               size="sm"
                               className="bg-purple-600 hover:bg-purple-700 text-white transition-colors"
-                              onClick={()=>handleTablePayment(billItem)}
+                              onClick={() => handleTablePayment(billItem)}
                             >
                               <DollarSign className="h-4 w-4 mr-1" />
                               ชำระเงิน
@@ -474,7 +487,7 @@ const BillingList = () => {
                     currency: "usd",
                   }}
                 >
-                  <CheckoutPage amount={Math.round(selectedBill.bill.Balance * 100)} usersession={session!} selectedbill={selectedBill}/>
+                  <CheckoutPage amount={Math.round(selectedBill.bill.Balance * 100)} usersession={session!} selectedbill={selectedBill} />
                 </Elements>
               </div>
 
@@ -494,5 +507,7 @@ const BillingList = () => {
     </div>
   );
 };
+
+
 
 export default BillingList;

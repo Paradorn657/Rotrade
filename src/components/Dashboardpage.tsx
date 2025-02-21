@@ -117,6 +117,38 @@ const MT5Dashboard = ({ email }: { email: string }) => {
     }
   };
 
+  
+
+  const [balances, setBalances] = useState<number[]>([]);
+  const [accountNames, setAccountNames] = useState<string[]>([]);
+  const [totalBalance, setTotalBalance] = useState(0);
+
+  const [chartText, setChartText] = useState("Loading...");
+  useEffect(() => {
+    if (accountNames.length > 0) {
+      setChartText(`Number of Assets: ${accountNames.length}`);
+    }else{
+      setChartText(`Connect Metatrader Account to show Assets`);
+    }
+
+    console.log(`Number of Assets: ${accountNames.length}`);
+  }, [accountNames]);
+
+
+
+  //ทุกครั้งที่ accounts เปลี่ยนก็คือมีการเพิ่มลบ mt5 account มันก็จะคำนวณใหม่
+  useEffect(() => {
+    if (accounts.length > 0) {
+      const newBalances = accounts.map((account: any) => account.balance);
+      const newAccountNames = accounts.map((account: any) => account.MT5_name || account.MT5_accountid);
+      const newTotalBalance = newBalances.reduce((acc, balance) => acc + balance, 0);
+
+      setBalances(newBalances);
+      setAccountNames(newAccountNames);
+      setTotalBalance(newTotalBalance);
+    }
+  }, [accounts]);
+
   useEffect(() => {
     fetchAccounts();
   }, []);
@@ -130,7 +162,7 @@ const MT5Dashboard = ({ email }: { email: string }) => {
       ctx.font = `${fontSize}em sans-serif`;
       ctx.textBaseline = "middle";
 
-      const text = "Number of assets: 4";
+      const text = chartText;
       const textX = Math.round((width - ctx.measureText(text).width) / 2);
       const textY = height / 2;
 
@@ -160,11 +192,12 @@ const MT5Dashboard = ({ email }: { email: string }) => {
       <div className="flex-1 bg-gray-200 flex items-center justify-center">
         <div className="w-60 h-60">
           <Doughnut
+           key={chartText} // 🔥 เปลี่ยน key ทุกครั้งที่ chartText เปลี่ยน
             data={{
-              labels: ['Red', 'Blue', 'Yellow'],
+              labels: accountNames,
               datasets: [{
-                label: 'My First Dataset',
-                data: [300, 50, 100],
+                label: 'Balance',
+                data: balances,
                 backgroundColor: ['rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)'],
                 borderWidth: 0,
               }],
@@ -231,7 +264,7 @@ const MT5Dashboard = ({ email }: { email: string }) => {
                         <Button
                           className="mt-7"
                           onClick={handleCreate}
-                          >
+                        >
                           Create
                         </Button>
                       </SheetClose>
