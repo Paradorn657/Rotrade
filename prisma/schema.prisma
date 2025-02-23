@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://Paradorn:12345@db:5432/Rotrade?schema=public"
 }
 
 model mt5Account {
@@ -57,6 +57,5 @@ model Bills{
   Balance Float
   Deals_count        Int
   dealsData          Json   // เพิ่ม field นี้เพื่อเก็บ JSON ของ filteredDeals (optional)
-
   user User @relation(fields: [User_id], references: [id])
 }

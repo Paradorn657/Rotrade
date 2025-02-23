@@ -124,8 +124,8 @@ const BillingList = () => {
   const filteredBills = billData
     ? billData.filter(bill => {
       if (activeTab === 'all') return true;
-      if (activeTab === 'open') return bill.bill.status !== 'PAID';
-      if (activeTab === 'past') return bill.bill.status === 'PAID';
+      if (activeTab === 'open') return bill.bill.status !== 'Paid';
+      if (activeTab === 'past') return bill.bill.status === 'Paid';
       return true;
     })
     : [];
@@ -272,12 +272,12 @@ const BillingList = () => {
                       </td>
                       <td className="py-4 px-4">
                         <Badge
-                          className={`font-medium ${billItem.bill.status === 'PAID'
+                          className={`font-medium ${billItem.bill.status === 'Paid'
                             ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
                             : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                             }`}
                         >
-                          {billItem.bill.status === 'PAID' ? 'ชำระแล้ว' : 'รอชำระเงิน'}
+                          {billItem.bill.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระเงิน'}
                         </Badge>
                       </td>
                       <td className="py-4 px-4">
@@ -290,7 +290,7 @@ const BillingList = () => {
                           >
                             ดูรายละเอียด
                           </Button>
-                          {billItem.bill.status !== 'PAID' && (
+                          {billItem.bill.status !== 'Paid' && (
                             <Button
                               variant="default"
                               size="sm"

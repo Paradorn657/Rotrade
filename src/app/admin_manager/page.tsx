@@ -23,6 +23,12 @@ import {
 import { useSession } from 'next-auth/react';
 
 import { toast, Toaster } from 'react-hot-toast';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import EditUserDialog from '@/components/edituserDialog';
+import UserDetailsModal from '@/components/userdetailModal';
 
 const LoadingHeader = () => (
   <div className="mb-10">
@@ -103,7 +109,7 @@ const LoadingTable = () => (
 
 
 export default function Admin() {
-  const { data: session  } = useSession();
+  const { data: session } = useSession();
   console.log("session at admin", session);
   const [stats, setStats] = useState<any>([]);
   const [users, setUsers] = useState([]);
@@ -114,7 +120,7 @@ export default function Admin() {
     try {
       const response = await fetch("/api/getinfoForAdmin");
       const data = await response.json();
-      
+
       if (response.ok) {
         // เปลี่ยนการตั้งค่าของ stats และ users ให้ตรงกับข้อมูลที่ได้รับจาก API
         setStats([
@@ -123,197 +129,215 @@ export default function Admin() {
           { title: 'Total MT5 Account', value: data.totalMT5Accounts, icon: BarChart2, color: 'bg-gradient-to-r from-purple-500 to-purple-600' },
           { title: 'Running Robot', value: data.runningRobots, icon: Bot, color: 'bg-gradient-to-r from-orange-500 to-orange-600' }
         ]);
-        console.log("data",data.usersDB)
+        console.log("data", data.usersDB)
         setUsers(data.usersDB);
       } else {
         console.error("Failed to fetch data", data.error);
       }
     } catch (error) {
       console.error("Error fetching data", error);
-    }finally {
+    } finally {
       setIsLoading(false);
     }
 
   };
 
-  
+
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 p-8">
-        <Toaster position="top-center" />
-        <LoadingHeader />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {[1, 2, 3, 4].map((i) => (
-            <LoadingStatsCard key={i} />
-          ))}
-        </div>
-        <LoadingTable />
-      </div>
-    );
-  }
-  
 
- 
+
+
   const deleteUser = async (userid: Number) => {
-      try{
-        const response = await fetch("/api/DeleteUser",{
-          method:"DELETE",
-          headers:{
-            "Content-Type":"application/json"
-          },
-          body:JSON.stringify({userid})
-        });
+    try {
+      const response = await fetch("/api/DeleteUser", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userid })
+      });
 
-        const data = await response.json()
-        console.log("data respone",data)
+      const data = await response.json()
+      console.log("data respone", data)
 
 
-        if(response.ok){
-          console.log("User deleted successfully:")
-          toast.success(`User ${data.user.name} deleted successfully`)
-          fetchData();
-        }else{
-          toast.error(`Cannot Delete User ${data.user.name} , Something went wrong`)
-        }
-
-      }catch(error){
-
+      if (response.ok) {
+        console.log("User deleted successfully:")
+        toast.success(`User ${data.user.name} deleted successfully`)
+        fetchData();
+      } else {
+        toast.error(`Cannot Delete User ${data.user.name} , Something went wrong`)
       }
+
+    } catch (error) {
+
+    }
   }
+
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, [isEditOpen]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 p-8">
       {/* Page Header */}
 
       <Toaster position="top-center" />
-      <div className="mb-10">
-        <div className="flex items-center space-x-4 mb-8">
-          <div className="h-14 w-1.5 bg-gradient-to-b from-blue-600 to-blue-400 rounded-full" />
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 tracking-tight">Admin page</h1>
-            <p className="text-gray-600 mt-1">Monitor and manage your system</p>
+
+      {isLoading ? (
+        <>
+          <LoadingHeader />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {[1, 2, 3, 4].map((i) => (
+              <LoadingStatsCard key={i} />
+            ))}
           </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 backdrop-blur-lg bg-opacity-90">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Welcome back,</p>
-              <h2 className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Admin {session?.user.name}
-              </h2>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+          <LoadingTable />
+        </>
+      ) : (
+        <>
+          <div className="mb-10">
+            <div className="flex items-center space-x-4 mb-8">
+              <div className="h-14 w-1.5 bg-gradient-to-b from-blue-600 to-blue-400 rounded-full" />
+              <div>
+                <h1 className="text-4xl font-bold text-gray-800 tracking-tight">Admin page</h1>
+                <p className="text-gray-600 mt-1">Monitor and manage your system</p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {stats.map((stat:any, index:any) => (
-          <Card key={index} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-lg bg-white bg-opacity-90">
-            <CardContent className="p-6">
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 backdrop-blur-lg bg-opacity-90">
               <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Welcome back,</p>
+                  <h2 className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Admin {session?.user.name}
+                  </h2>
+                </div>
                 <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-xl ${stat.color}`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                   </div>
                 </div>
-                <div className="text-green-500 text-sm font-semibold">
-                  {stat.growth}
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Users Table */}
-      <Card className="overflow-hidden shadow-xl backdrop-blur-lg bg-white bg-opacity-90">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800">Users Management</h3>
             </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus className="w-5 h-5" />
-              <span>Add User</span>
-            </button>
           </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Create Date</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user:any) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{user.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{new Date(user.create_at).toLocaleDateString('en-GB')}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className ={`px-3 py-1 text-xs font-semibold rounded-full ${user.role === 'BAN' ? 'bg-red-100 text-red-800':'bg-blue-100 text-blue-600'}  ` }>
-                      {user.role}
-                    </span>
-                  </td>
-                  
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="focus:outline-none">
-                        <MoreVertical className="w-5 h-5 text-gray-500 hover:text-gray-700" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100">
-                          <Eye className="w-4 h-4 text-blue-600" />
-                          <span>View Details</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100">
-                          <Edit className="w-4 h-4 text-green-600" />
-                          <span>Edit User</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => deleteUser(user.id)}>
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                          <span className="text-red-600">Delete User</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {stats.map((stat: any, index: any) => (
+              <Card key={index} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-lg bg-white bg-opacity-90">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className={`p-3 rounded-xl ${stat.color}`}>
+                        <stat.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                        <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
+                      </div>
+                    </div>
+                    <div className="text-green-500 text-sm font-semibold">
+                      {stat.growth}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Users Table */}
+          <Card className="overflow-hidden shadow-xl backdrop-blur-lg bg-white bg-opacity-90">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Users className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800">Users Management</h3>
+                </div>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  <Plus className="w-5 h-5" />
+                  <span>Add User</span>
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Create Date</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {users.map((user: any) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{user.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{new Date(user.create_at).toLocaleDateString('en-GB')}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${user.role === 'BAN' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-600'}  `}>
+                          {user.role}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="focus:outline-none">
+                            <MoreVertical className="w-5 h-5 text-gray-500 hover:text-gray-700" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem  className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => setIsDetailsOpen(true)}>
+                              <Eye className="w-4 h-4 text-blue-600" />
+                              <span>View Details</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => setIsEditOpen(true)} >
+                              <Edit className="w-4 h-4 text-green-600" />
+                              <span>Edit User</span>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => deleteUser(user.id)}>
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                              <span className="text-red-600">Delete User</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                      <EditUserDialog user={user} isOpen={isEditOpen} setIsOpen={setIsEditOpen} />
+                      <UserDetailsModal
+                        isOpen={isDetailsOpen}
+                        setIsOpen={setIsDetailsOpen}
+                        user={user}
+                      />
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
     </div>
+
   );
 }
