@@ -10,7 +10,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://Paradorn:12345@db:5432/Rotrade?schema=public"
+  url      = "postgresql://postgres:12345@localhost:5432/Rotrade?schema=public"
+  // url      = "postgresql://Paradorn:12345@db:5432/Rotrade?schema=public"
 }
 
 model mt5Account {

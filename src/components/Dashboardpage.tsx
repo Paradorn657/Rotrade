@@ -5,7 +5,9 @@ import { Doughnut } from 'react-chartjs-2';
 import { Clipboard } from "flowbite-react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { TrendingUp, Award, AlertTriangle, Percent } from 'lucide-react';
 import { Label } from "@/components/ui/label"
+import { Sparkles, BarChart2, Clock } from 'lucide-react';
 import {
   Sheet,
   SheetClose,
@@ -18,6 +20,11 @@ import {
 } from "@/components/ui/sheet"
 import { RefreshCcw } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js/auto';
+import { Session } from "next-auth";
+import { Bills } from "@prisma/client";
+
+
+
 
 export function Component({ api_token }: { api_token: string }) {
   const displayedToken = api_token.length > 10 ? api_token.slice(0, 10) + " ************" : api_token;
@@ -41,19 +48,20 @@ export function Component({ api_token }: { api_token: string }) {
   );
 }
 
-const MT5Dashboard = ({ email }: { email: string }) => {
+const MT5Dashboard = ({ session }: { session: Session }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [token, setToken] = useState("");
   const [mt5InstanceId, setMt5InstanceId] = useState("");
   const [mt5Id, setMt5Id] = useState("");
   const [mt5Name, setMt5Name] = useState("");
 
+
   function generateRandomToken(length: number = 32): string {
     return randomBytes(length).toString('hex');
   }
 
   const handleGenerateToken = async () => {
-    if (!email) {
+    if (!session.user.email) {
       alert("User session is invalid or email is missing!");
       return;
     }
@@ -117,7 +125,7 @@ const MT5Dashboard = ({ email }: { email: string }) => {
     }
   };
 
-  
+
 
   const [balances, setBalances] = useState<number[]>([]);
   const [accountNames, setAccountNames] = useState<string[]>([]);
@@ -127,8 +135,12 @@ const MT5Dashboard = ({ email }: { email: string }) => {
   useEffect(() => {
     if (accountNames.length > 0) {
       setChartText(`Number of Assets: ${accountNames.length}`);
-    }else{
-      setChartText(`Connect Metatrader Account to show Assets`);
+    } else {
+      if (loading) {
+        setChartText(`Loading.....`);
+      } else {
+        setChartText(`Connect Metatrader Account to show Assets`);
+      }
     }
 
     console.log(`Number of Assets: ${accountNames.length}`);
@@ -149,9 +161,10 @@ const MT5Dashboard = ({ email }: { email: string }) => {
     }
   }, [accounts]);
 
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
+
+
+
+
 
   const centerTextPlugin = {
     id: "centerText",
@@ -186,13 +199,235 @@ const MT5Dashboard = ({ email }: { email: string }) => {
     },
   };
 
+  async function fetchUserData() {
+    try {
+      const response = await fetch(`/api/get-usersdetail?userId=${session.user.id}`);
+      const data = await response.json();
+      if (response.ok) {
+        setUser(data.usersDB);
+      }
+      console.log("userdata", data.usersDB)
+      setLoading(false);
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+
+    fetchAccounts();
+    fetchUserData();
+
+  }, []);
+
+
+
+
+
+  const [user, setUser] = useState<any>();
+  console.log("userbILL", user?.Bills)
+  const isTradeEnabled = user?.role !== "BAN";
+
+  const calculateAccountAge = (createDate: any) => {
+    if (!createDate) return "N/A";
+    const created: any = new Date(createDate);
+    const now: any = new Date();
+    const diffTime = Math.abs(now - created);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 30) return `${diffDays} days`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) return `${diffMonths} months`;
+    const diffYears = Math.floor(diffMonths / 12);
+    const remainingMonths = diffMonths % 12;
+    return remainingMonths > 0 ? `${diffYears}y ${remainingMonths}m` : `${diffYears} years`;
+  };
+
+  const [totalDeals, setTotalDeals] = useState(0);
+  const [winDeals, setWinDeals] = useState(0);
+  const [loseDeals, setLoseDeals] = useState(0);
+  const [winPercentage, setWinPercentage] = useState(0);
+
+  useEffect(() => {
+    if (!user || !user.Bills) return;
+
+    let total = 0;
+    let win = 0;
+    let lose = 0;
+
+    user.Bills.forEach((bill: Bills) => {
+      if (Array.isArray(bill.dealsData)) {
+        total += bill.dealsData.length;
+        win += bill.dealsData.filter((deal: any) => deal?.profit > 0).length;
+        lose += bill.dealsData.filter((deal: any) => deal?.profit <= 0).length;
+      }
+    });
+
+    setTotalDeals(total);
+    setWinDeals(win);
+    setLoseDeals(lose);
+    setWinPercentage(total > 0 ? (win / total) * 100 : 0);
+  }, [user]);
+
   return (
     <div className="flex flex-col h-screen">
       {/* Top Section (60%) */}
       <div className="flex-1 bg-gray-200 flex items-center justify-center">
+
+        {user && (<>
+          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 max-w-3xl m-5">
+            {/* Header with gradient and profile info */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-white font-bold text-lg flex items-center">
+                  <Sparkles className="w-4 h-4 mr-2" /> Trader Profile
+                </h2>
+                <div className={`px-3 py-1 rounded-full text-xs font-bold ${isTradeEnabled
+                    ? "bg-emerald-400 text-emerald-900"
+                    : "bg-red-400 text-red-900"
+                  }`}>
+                  {isTradeEnabled ? "ACTIVE TRADER" : "ACCOUNT SUSPENDED"}
+                </div>
+              </div>
+
+              {/* User brief info */}
+              <div className="flex items-center">
+                <div className="flex-shrink-0 relative">
+                  <div className="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-lg font-bold">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'ภ'}
+                  </div>
+                  <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${isTradeEnabled ? "bg-green-500" : "bg-red-500"
+                    }`}></div>
+                </div>
+                <div className="ml-3 text-white">
+                  <h3 className="font-bold text-base">{user?.name || 'ภราดร จันทร์เจริญ'}</h3>
+                  <p className="text-white/80 text-xs flex items-center">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-300 mr-1.5"></span>
+                    {user?.email || 'paradorn657@gmail.com'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content section with tabs */}
+            <div className="p-4">
+              {/* Account details cards */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gray-50 rounded-lg p-3 flex items-center">
+                  <div className="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center text-blue-600 mr-2">
+                    <BarChart2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">ACCOUNT ID</p>
+                    <p className="text-sm font-bold text-gray-800"># {user?.id || "1"}</p>
+                  </div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 flex items-center">
+                  <div className="w-8 h-8 rounded-md bg-purple-100 flex items-center justify-center text-purple-600 mr-2">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">ACCOUNT AGE</p>
+                    <p className="text-sm font-bold text-gray-800">{calculateAccountAge(user?.create_at)}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trading Status */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-gray-500">Trading Status</span>
+                  <span className={`text-sm font-bold ${isTradeEnabled ? "text-green-500" : "text-red-500"}`}>
+                    {isTradeEnabled ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full"
+                    style={{ width: isTradeEnabled ? '100%' : '30%' }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Trading Statistics */}
+              <div className="mb-4">
+                <h3 className="text-sm font-bold text-gray-700 mb-2">Trading Performance</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="bg-blue-50 rounded-lg p-2 text-center">
+                    <div className="flex justify-center mb-1">
+                      <TrendingUp className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <p className="text-xs text-gray-500">รวมดีล</p>
+                    <p className="text-sm font-bold text-blue-600">{totalDeals}</p>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-2 text-center">
+                    <div className="flex justify-center mb-1">
+                      <Award className="w-4 h-4 text-green-500" />
+                    </div>
+                    <p className="text-xs text-gray-500">ชนะ</p>
+                    <p className="text-sm font-bold text-green-600">{winDeals}</p>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-2 text-center">
+                    <div className="flex justify-center mb-1">
+                      <AlertTriangle className="w-4 h-4 text-red-500" />
+                    </div>
+                    <p className="text-xs text-gray-500">แพ้</p>
+                    <p className="text-sm font-bold text-red-600">{loseDeals}</p>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-2 text-center">
+                    <div className="flex justify-center mb-1">
+                      <Percent className="w-4 h-4 text-purple-500" />
+                    </div>
+                    <p className="text-xs text-gray-500">อัตราชนะ</p>
+                    <p className="text-sm font-bold text-purple-600">{winPercentage.toFixed(1)}%</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Connected Accounts */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-2">บัญชีที่เชื่อมต่อ</h3>
+                <div className="bg-gray-50 rounded-lg overflow-hidden">
+                  <table className="min-w-full table-auto border-collapse text-sm">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">บัญชี</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">โมเดล</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">เวอร์ชัน</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {user?.mt5Accounts?.filter(account => account.model).map(account => (
+                        <tr key={account.MT5_id} className="hover:bg-gray-100 transition-all duration-200">
+                          <td className="px-3 py-2 font-medium text-gray-800">{account.MT5_name}</td>
+                          <td className="px-3 py-2 text-gray-600">{account.model?.name || "ไม่มี"}</td>
+                          <td className="px-3 py-2 text-gray-600 truncate max-w-xs">{account.model?.version}</td>
+                        </tr>
+                      ))}
+                      {(!user?.mt5Accounts || user?.mt5Accounts.length === 0) && (
+                        <tr>
+                          <td colSpan="3" className="px-3 py-3 text-center text-gray-500">ยังไม่มีบัญชีที่เชื่อมต่อ</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </>
+
+
+        )}
+
+
+
         <div className="w-60 h-60">
           <Doughnut
-           key={chartText} // 🔥 เปลี่ยน key ทุกครั้งที่ chartText เปลี่ยน
+            key={chartText} // 🔥 เปลี่ยน key ทุกครั้งที่ chartText เปลี่ยน
             data={{
               labels: accountNames,
               datasets: [{
@@ -248,7 +483,7 @@ const MT5Dashboard = ({ email }: { email: string }) => {
                     />
                   </div>
                   <p className="text-sm text-gray-700">
-                    Token will be generated for: <b>{email}</b>
+                    Token will be generated for: <b>{session.user.email}</b>
                   </p>
                   <Button onClick={handleGenerateToken}>Generate Token</Button>
                 </div>

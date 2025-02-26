@@ -24,5 +24,5 @@ export default function Page() {
 
 
 
-  return <MT5Dashboard email={session.user.email} />;
+  return <MT5Dashboard session={session} />;
 }
