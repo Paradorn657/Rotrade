@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         userId: usersession.user.id, // ระบุไอดีของลูกค้า
         customerName:usersession.user.name,
+        forMT5id: selectedbill.bill.MT5_accountid,
         billid: selectedbill.bill.Bill_id, 
       }
     });

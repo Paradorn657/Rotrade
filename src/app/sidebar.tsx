@@ -6,6 +6,9 @@ import Link from "next/link";
 import { useContext, createContext, useState, ReactNode, useEffect } from "react";
 import { usePathname } from 'next/navigation';
 import { Session } from "next-auth";
+import { useSession } from "next-auth/react";
+
+
 
 // ระบุชนิดข้อมูลสำหรับ SidebarContext
 interface SidebarContextType {
@@ -24,6 +27,12 @@ interface SidebarProps {
 // Sidebar Component
 export default function Sidebar({ children }: SidebarProps) {
   const [expanded, setExpanded] = useState(true);
+
+  const [isClient, setIsClient] = useState(false)
+ 
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   return (
     <aside
@@ -82,44 +91,47 @@ interface SidebarItemProps {
   alert?: boolean;
   href: Url;
   onClick?: () => void; // Optional click handler
-  session: Session | null;
   forRole?: string; // เมนูนี้สำหรับ role อะไร
   }
 
 // SidebarItem Component
-  export function SidebarItem({ icon, text, active, alert, href, onClick, session, forRole}: SidebarItemProps) {
-  const context = useContext(SidebarContext);
+export function SidebarItem({ icon, text, active, alert, href, onClick, forRole }: SidebarItemProps) {
+  const { data: session } = useSession();
+  
+  const context = useContext(SidebarContext); // ✅ ใช้ useContext ก่อนอื่น
   const expanded = context?.expanded ?? true;
 
   const [isClient, setIsClient] = useState(false);
-  const pathname = usePathname();
 
-   // ⬇️ ถ้ามีการกำหนด forRole มา ให้ตรวจสอบ
-   if (forRole && session?.user?.role !== forRole) {
-    // console.log("layout:",session)
-    // console.log("สร้างเฉพาะ",text,"for",forRole);
-    return null;
-  }
-
-  // Use useEffect to set isClient to true once the component has mounted
+ 
   useEffect(() => {
-    setIsClient(true);  // Set isClient to true once mounted on the client side
-  }, []);
+    setIsClient(true)
+  }, [])
+  const pathname = usePathname();
+  const [hidden, setHidden] = useState(false); // ✅ ใช้ state แทน return null
 
-  // Skip active check before mounting (during SSR)
+  useEffect(() => {
+    if (forRole && session?.user?.role !== forRole) {
+      setHidden(true);
+    } else {
+      setHidden(false);
+    }
+  }, [forRole, session]);
+
+  if (hidden) return null; // ✅ ซ่อนคอมโพเนนต์ที่นี่ แทนการ return ก่อน Hooks
+
   const isActive = isClient ? (active ?? pathname === href) : false;
+
   return (
     <li
-      className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${!session ? "pointer-events-none opacity-50" : ""}  
+      className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${
+        !session ? "pointer-events-none opacity-50" : ""
+      }  
         ${isActive ? "bg-gradient-to-tr from-indigo-200 to-indigo-100 text-indigo-800" : "hover:bg-indigo-50 text-gray-600"}`}
     >
       {icon}
-      <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
-        {text}
-      </span>
-      {alert && (
-        <div className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${expanded ? "" : "top-2"}`} />
-      )}
+      <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>{text}</span>
+      {alert && <div className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${expanded ? "" : "top-2"}`} />}
       {!expanded && (
         <div
           className={`absolute left-full rounded-md px-2 py-1 ml-6
@@ -133,3 +145,4 @@ interface SidebarItemProps {
     </li>
   );
 }
+

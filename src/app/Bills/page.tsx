@@ -35,10 +35,12 @@ interface Deal {
 interface Bill {
   Bill_id: number;
   User_id: number;
+  MT5_accountid: string;
   Billing_startdate: string;
   Billing_enddate: string;
   status: string;
   Balance: number;
+  bill_show: boolean;
 }
 
 interface BillData {
@@ -65,7 +67,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 const BillingList = () => {
   const [billData, setBillData] = useState<BillData[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('open');
   const [selectedBill, setSelectedBill] = useState<BillData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -94,10 +96,13 @@ const BillingList = () => {
               bill: {
                 Bill_id: item.bill.Bill_id,
                 User_id: item.bill.User_id,
+                MT5_accountid: item.bill.MT5_accountid,
                 Billing_startdate: item.bill.Billing_startdate,
                 Billing_enddate: item.bill.Billing_enddate,
                 status: item.bill.status,
                 Balance: item.bill.Balance,
+                Deals_count: item.bill.Deals_count,
+                bill_show: item.bill.bill_show,
               },
               deals: item.deals || [],
               totalProfit: item.totalProfit,
@@ -124,8 +129,9 @@ const BillingList = () => {
   const filteredBills = billData
     ? billData.filter(bill => {
       if (activeTab === 'all') return true;
-      if (activeTab === 'open') return bill.bill.status !== 'Paid';
-      if (activeTab === 'past') return bill.bill.status === 'Paid';
+      if (activeTab === 'open') return bill.bill.status !== 'Paid' && bill.bill.bill_show !== false;
+      if (activeTab === 'past') return bill.bill.status === 'Paid' && bill.bill.bill_show !== false;
+      if (activeTab === 'no-payment') return bill.bill.bill_show === false;
       return true;
     })
     : [];
@@ -209,6 +215,13 @@ const BillingList = () => {
               </Button>
               <Button
                 variant="ghost"
+                className={`flex-1 sm:flex-none text-sm h-9 ${activeTab === 'no-payment' ? 'bg-white shadow text-purple-700 font-medium' : 'text-gray-600'}`}
+                onClick={() => setActiveTab('no-payment')}
+              >
+                บิลที่ไม่ต้องจ่าย
+              </Button>
+              <Button
+                variant="ghost"
                 className={`flex-1 sm:flex-none text-sm h-9 ${activeTab === 'all' ? 'bg-white shadow text-purple-700 font-medium' : 'text-gray-600'}`}
                 onClick={() => setActiveTab('all')}
               >
@@ -223,6 +236,7 @@ const BillingList = () => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MT5 Account</th>
                   <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ระยะเวลา</th>
                   <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จำนวนดีล</th>
                   <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ยอดชำระ</th>
@@ -233,7 +247,7 @@ const BillingList = () => {
               <tbody className="bg-white divide-y divide-gray-100">
                 {filteredBills.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-gray-500">
+                    <td colSpan={7} className="py-8 text-center text-gray-500">
                       <div className="flex flex-col items-center space-y-2">
                         <ClipboardList className="h-8 w-8 text-gray-300" />
                         <p>ไม่พบรายการในหมวดหมู่นี้</p>
@@ -245,6 +259,9 @@ const BillingList = () => {
                     <tr key={billItem.bill.Bill_id} className="hover:bg-gray-50 transition-colors">
                       <td className="py-4 px-4">
                         <span className="font-mono text-sm font-medium text-gray-700">#INV-{billItem.bill.Bill_id}</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="font-mono text-sm font-medium text-gray-700">{billItem.bill.MT5_accountid}</span>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center">
@@ -271,14 +288,20 @@ const BillingList = () => {
                         </span>
                       </td>
                       <td className="py-4 px-4">
-                        <Badge
-                          className={`font-medium ${billItem.bill.status === 'Paid'
-                            ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
-                            : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                            }`}
-                        >
-                          {billItem.bill.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระเงิน'}
-                        </Badge>
+                        {billItem.bill.bill_show === false ? (
+                          <Badge className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 font-medium">
+                            ไม่ต้องชำระ
+                          </Badge>
+                        ) : (
+                          <Badge
+                            className={`font-medium ${billItem.bill.status === 'Paid'
+                              ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                              : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                              }`}
+                          >
+                            {billItem.bill.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระเงิน'}
+                          </Badge>
+                        )}
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex space-x-2">
@@ -290,7 +313,7 @@ const BillingList = () => {
                           >
                             ดูรายละเอียด
                           </Button>
-                          {billItem.bill.status !== 'Paid' && (
+                          {billItem.bill.status !== 'Paid' && billItem.bill.bill_show !== false && (
                             <Button
                               variant="default"
                               size="sm"
@@ -323,20 +346,30 @@ const BillingList = () => {
                 </div>
                 <div className="ml-3">
                   <DialogTitle className="text-xl font-semibold text-gray-900">
-                    รายละเอียดบิล #{selectedBill.bill.Bill_id}
+                    รายละเอียดบิล #{selectedBill.bill.Bill_id} (MT5 ID {selectedBill.bill.MT5_accountid})
                   </DialogTitle>
+                  
+
                   <DialogDescription className="text-sm text-gray-500 mt-1">
                     ช่วงเวลา: {new Date(selectedBill.bill.Billing_startdate).toLocaleDateString('th-TH')} - {new Date(selectedBill.bill.Billing_enddate).toLocaleDateString('th-TH')}
                   </DialogDescription>
+
                 </div>
-                <Badge
-                  className={`ml-auto ${selectedBill.bill.status === 'PAID'
-                    ? 'bg-green-50 text-green-700 border-green-200'
-                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}
-                >
-                  {selectedBill.bill.status === 'PAID' ? 'ชำระแล้ว' : 'รอชำระเงิน'}
-                </Badge>
+                
+                {selectedBill.bill.bill_show === false ? (
+                  <Badge className="ml-auto bg-gray-50 text-gray-700 border-gray-200 font-medium">
+                    ไม่ต้องชำระ
+                  </Badge>
+                ) : (
+                  <Badge
+                    className={`ml-auto ${selectedBill.bill.status === 'PAID'
+                      ? 'bg-green-50 text-green-700 border-green-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}
+                  >
+                    {selectedBill.bill.status === 'PAID' ? 'ชำระแล้ว' : 'รอชำระเงิน'}
+                  </Badge>
+                )}
               </div>
             </DialogHeader>
 
@@ -432,7 +465,7 @@ const BillingList = () => {
               <DialogClose asChild>
                 <Button variant="outline">ปิด</Button>
               </DialogClose>
-              {selectedBill.bill.status !== 'PAID' && (
+              {selectedBill.bill.status !== 'PAID' && selectedBill.bill.bill_show !== false && (
                 <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={(e) => handlePayment(selectedBill)}>
                   <DollarSign className="h-4 w-4 mr-2" />
                   ชำระเงิน
@@ -507,7 +540,5 @@ const BillingList = () => {
     </div>
   );
 };
-
-
 
 export default BillingList;

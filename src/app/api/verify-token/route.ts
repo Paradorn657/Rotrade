@@ -32,8 +32,6 @@ export async function POST(req: Request) {
         },
     });
     }
-
-
     return NextResponse.json({
       valid: true,
       message: 'Token verified and update status'

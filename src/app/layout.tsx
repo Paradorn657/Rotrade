@@ -40,14 +40,14 @@ export default async function RootLayout({children,}: Readonly<{children: React.
 
             <div className="flex flex-1 overflow-hidden">
               <Sidebar>
-                <SidebarItem icon={<LayoutDashboard />}  href="/Dashboard" text="Dashboard" session={session} />
-                <SidebarItem icon={<Radio />} href="/robot" text="MT5 Signal Bot" session={session} /> 
-                <SidebarItem icon={<SlidersHorizontal />} href="/control_panel" text="Control Panel" session={session}/>
+                <SidebarItem icon={<LayoutDashboard />}  href="/Dashboard" text="Dashboard"  />
+                <SidebarItem icon={<Radio />} href="/robot" text="MT5 Signal Bot" /> 
+                <SidebarItem icon={<SlidersHorizontal />} href="/control_panel" text="Control Panel" />
                 {/* <SidebarItem icon={<History />} href="/trade_history" text="Trade History" /> */}
-                <SidebarItem icon={<ReceiptText/>} href="/Bills" text="Bills" session={session} />
-                <SidebarItem icon={<Shield />} href="/admin_manager" text="Admin"  session={session} forRole="admin"/>
+                <SidebarItem icon={<ReceiptText/>} href="/Bills" text="Bills" />
+                <SidebarItem icon={<Shield />} href="/admin_manager" text="Admin"  forRole="admin"/>
                 <hr className="my-3" />
-                <SidebarItem icon={<Settings />} href="/settings"text="Settings"  session={session}/>
+                <SidebarItem icon={<Settings />} href="/settings"text="Settings"  />
               </Sidebar>
 
               <div className="flex-1 overflow-y-auto">

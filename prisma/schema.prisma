@@ -24,6 +24,7 @@ model mt5Account {
   status    String? @default("Disconnect")
   balance   Float?  @default(0)
   signal_status String   @default("OFF")
+  last_billed DateTime?    @default(now())
   user User @relation(fields: [user_id], references: [id]) // เชื่อมกับ User.id
   model Model? @relation(fields: [model_id], references: [Model_id])
 }
@@ -52,11 +53,13 @@ model Model{
 model Bills{
   Bill_id Int @id @default(autoincrement())
   User_id Int
+  MT5_accountid      String
   Billing_startdate DateTime
   Billing_enddate DateTime
   status String? @default("Unpaid")
   Balance Float
   Deals_count        Int
   dealsData          Json   // เพิ่ม field นี้เพื่อเก็บ JSON ของ filteredDeals (optional)
+  Bill_show         Boolean @default(false)
   user User @relation(fields: [User_id], references: [id])
 }

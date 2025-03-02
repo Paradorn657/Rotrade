@@ -2,216 +2,268 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { CheckCircle, XCircle, TrendingUp, Wallet, LineChart } from "lucide-react";
+import { 
+  CheckCircle, 
+  XCircle, 
+  Bot, 
+  RotateCw,
+  AlertTriangle,
+  Search,
+  PlusCircle
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import LoginRedirect from "@/components/loginredirect";
-import LoadingSpinner from "@/components/Loadingspinner";
 
-const overallStats = {
-    totalTodayPnl: "$100",
-    totalCumulativePnl: "$100",
-    totalUnrealizedPnl: "$100",
-};
+import { useRouter } from "next/navigation";
 
 export default function ControlPanel() {
-    const [robotStatus, setRobotStatus] = useState();
-    const { status, data: session } = useSession();
+    const router = useRouter();  
+  const [robotStatus, setRobotStatus] = useState<{ 
+    id: string; 
+    name: string; 
+    mt5Id: string; 
+    balance: number; 
+    mt5name: string; 
+    status: string; 
+    signalStatus: string; 
+  }[]>([]);
 
-    const fetchRobots = () => {
-        if (session?.user?.id) {
-            fetch(`/api/getcontrolbot?user_id=${session.user.id}`)
-                .then((response) => response.json())
-                .then((data) => {
-                    setRobotStatus(data.map((account) => ({
-                        id: account.MT5_id,
-                        name: account.model.name,
-                        mt5Id: account.MT5_accountid,
-                        balance: account.balance,
-                        todayPnl: "$0",
-                        cumulativePnl: "$0",
-                        unrealizedPnl: "$0",
-                        status: account.status === "Connected",
-                        signalStatus: account.signal_status,
-                    })));
-                })
-                .catch((error) => {
-                    console.error("Error fetching MT5 accounts:", error);
-                });
-        }
-    };
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { status, data: session } = useSession();
 
-    useEffect(() => {
-        fetchRobots();
-    }, [session]);
-
-    const toggleSignalStatus = async (id: any, currentStatus: any) => {
-        try {
-            const newStatus = currentStatus === "ON" ? "OFF" : "ON";
-            setRobotStatus((prev: any) =>
-                prev.map((robot: any) =>
-                    robot.id === id ? { ...robot, signalStatus: newStatus } : robot
-                )
-            );
-
-            const response = await fetch("/api/updateRobotsignalstatus", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: id,
-                    signal_status: newStatus,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to update signal_status in DB");
-            }
-
-            fetchRobots();
-        } catch (error) {
-            console.error("Error updating signal_status:", error);
-            setRobotStatus((prev) =>
-                prev.map((robot) =>
-                    robot.id === id ? { ...robot, signalStatus: currentStatus } : robot
-                )
-            );
-        }
-    };
-
-    if (status === "loading") {
-        return <LoadingSpinner />;
+  const fetchRobots = () => {
+    if (session?.user?.id) {
+      setIsLoading(true);
+      fetch(`/api/getcontrolbot?user_id=${session.user.id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setRobotStatus(data.map((account) => ({
+            id: account.MT5_id,
+            name: account.model.name,
+            mt5Id: account.MT5_accountid,
+            balance: account.balance,
+            mt5name: account.MT5_name,
+            status: account.status,
+            signalStatus: account.signal_status,
+          })));
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching MT5 accounts:", error);
+          setIsLoading(false);
+        });
     }
+  };
 
+  useEffect(() => {
+    fetchRobots();
+  }, [session]);
 
-    if (!session) {
-        return (<LoginRedirect />)
-    } else {
+  const toggleSignalStatus = async (id:any, currentStatus:string) => {
+    try {
+      const newStatus = currentStatus === "ON" ? "OFF" : "ON";
+      setRobotStatus((prev) =>
+        prev.map((robot) =>
+          robot.id === id ? { ...robot, signalStatus: newStatus } : robot
+        )
+      );
 
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-                <div className="max-w-7xl mx-auto space-y-8">
-                    <div className="flex justify-between items-center">
-                        <h1 className="text-2xl font-bold text-gray-800">
-                            Control & Monitor Panel
-                        </h1>
+      const response = await fetch("/api/updateRobotsignalstatus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: id,
+          signal_status: newStatus,
+        }),
+      });
+      setRobotStatus((prev) =>
+        prev.map((robot) =>
+          robot.id === id ? { ...robot, signalStatus: currentStatus } : robot
+        )
+      );
 
-                    </div>
+      fetchRobots();
+    } catch (error) {
+      console.error("Error updating signal_status:", error);
+      setRobotStatus((prev) =>
+        prev.map((robot) =>
+          robot.id === id ? { ...robot, signalStatus: currentStatus } : robot
+        )
+      );
+    }
+  };
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-none shadow-md">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                                    <TrendingUp className="w-4 h-4" />
-                                    Total Today PnL
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-gray-800">
-                                    {overallStats.totalTodayPnl}
-                                </div>
-                            </CardContent>
-                        </Card>
+  const filteredRobots = robotStatus.filter(robot => 
+    robot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    robot.mt5name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    robot.mt5Id.toString().includes(searchTerm)
+  );
 
-                        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-none shadow-md">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                                    <LineChart className="w-4 h-4" />
-                                    Total Cumulative PnL
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-gray-800">
-                                    {overallStats.totalCumulativePnl}
-                                </div>
-                            </CardContent>
-                        </Card>
+//   if (status === "loading") {
+//     return <LoadingSpinner />;
+//   }
 
-                        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-none shadow-md">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                                    <Wallet className="w-4 h-4" />
-                                    Total Unrealized PnL
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-gray-800">
-                                    {overallStats.totalUnrealizedPnl}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+  if (!session) {
+    return <LoginRedirect />;
+  } 
 
-                    <Card className="border-none shadow-lg">
-                        <CardHeader>
-                            <CardTitle>Active Bots</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="bg-gray-50">
-                                        <TableHead>Bot Name</TableHead>
-                                        <TableHead>MT5 ID</TableHead>
-                                        <TableHead>Balance</TableHead>
-                                        <TableHead>Today PnL</TableHead>
-                                        <TableHead>Cumulative PnL</TableHead>
-                                        <TableHead>Unrealized PnL</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {robotStatus && robotStatus.length > 0 ? (
-                                        robotStatus.map((robot) => (
-                                            <TableRow key={robot.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <TableCell className="font-medium">{robot.name}</TableCell>
-                                                <TableCell>{robot.mt5Id}</TableCell>
-                                                <TableCell>{robot.balance}</TableCell>
-                                                <TableCell>{robot.todayPnl}</TableCell>
-                                                <TableCell>{robot.cumulativePnl}</TableCell>
-                                                <TableCell>{robot.unrealizedPnl}</TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-2">
-                                                        {robot.signalStatus === "ON" ? (
-                                                            <div className="flex items-center gap-1.5 text-green-600">
-                                                                <CheckCircle className="w-4 h-4" />
-                                                                <span className="text-sm font-medium">Running</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center gap-1.5 text-red-600">
-                                                                <XCircle className="w-4 h-4" />
-                                                                <span className="text-sm font-medium">Stopped</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Switch
-                                                        checked={robot.signalStatus === "ON"}
-                                                        onCheckedChange={() => toggleSignalStatus(robot.id, robot.signalStatus)}
-                                                        className="data-[state=checked]:bg-blue-600"
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={8} className="h-24 text-center">
-                                                <div className="flex flex-col items-center justify-center text-gray-500">
-                                                    <div className="mb-2">No bots found</div>
-                                                    <div className="text-sm">
-                                                        Get started by adding a new bot from the robot selection page
-                                                    </div>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <Card className="border border-gray-200 bg-white shadow-md">
+          <CardHeader className="border-b border-gray-100 pb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <Bot className="w-6 h-6 text-blue-600" />
                 </div>
+                <CardTitle className="text-xl md:text-2xl font-bold text-gray-800">
+                  Trading Bot Control Center
+                </CardTitle>
+              </div>
+              
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input 
+                    placeholder="Search bots..." 
+                    className="pl-10 bg-white border-gray-200 text-gray-600 placeholder:text-gray-400 w-full"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <Button 
+                  onClick={fetchRobots} 
+                  variant="outline" 
+                  className="border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                >
+                  <RotateCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => router.push("/robot")}>
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Add Bot
+                </Button>
+              </div>
             </div>
-        );
-    }
+          </CardHeader>
+          
+          <CardContent className="pt-6">
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                Loading...
+              </div>
+            ) : (
+              <div className="rounded-lg overflow-hidden border border-gray-200">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 hover:bg-gray-50">
+                      <TableHead className="text-gray-600 font-medium">Bot Name</TableHead>
+                      <TableHead className="text-gray-600 font-medium">MT5 ID</TableHead>
+                      <TableHead className="text-gray-600 font-medium">MT5 Name</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Balance</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Connection</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Status</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRobots.length > 0 ? (
+                      filteredRobots.map((robot) => (
+                        <TableRow 
+                          key={robot.id} 
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        >
+                          <TableCell className="font-medium text-gray-800">{robot.name}</TableCell>
+                          <TableCell className="text-gray-600">{robot.mt5Id}</TableCell>
+                          <TableCell className="text-gray-600">{robot.mt5name}</TableCell>
+                          <TableCell className="font-medium text-gray-800">{robot.balance}</TableCell>
+                          <TableCell>
+                            {robot.status === "CONNECTED" ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-sm text-green-600">Connected</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                <span className="text-sm text-red-600">Disconnected</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {robot.signalStatus === "ON" ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="p-1 rounded-full bg-green-100">
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                </div>
+                                <span className="text-sm font-medium text-green-600">Running</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <div className="p-1 rounded-full bg-red-100">
+                                  <XCircle className="w-4 h-4 text-red-600" />
+                                </div>
+                                <span className="text-sm font-medium text-red-600">Stopped</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={robot.signalStatus === "ON"}
+                                onCheckedChange={() => toggleSignalStatus(robot.id, robot.signalStatus)}
+                                className="data-[state=checked]:bg-green-600"
+                              />
+                              {/* <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="h-8 px-2 border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                              >
+                                Details
+                              </Button> */}
+                              
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow className="hover:bg-white">
+                        <TableCell colSpan={7} className="h-32">
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="p-3 rounded-full bg-gray-100 mb-4">
+                              <AlertTriangle className="w-6 h-6 text-amber-500" />
+                            </div>
+                            <div className="text-lg font-medium text-gray-800 mb-2">No bots found</div>
+                            <div className="text-sm text-gray-500 max-w-md text-center">
+                              {searchTerm ? 
+                                "No bots matched your search criteria. Try a different search term." : 
+                                "Get started by adding a new bot from the robot selection page."}
+                            </div>
+                            {searchTerm && (
+                              <Button 
+                                className="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700"
+                                onClick={() => setSearchTerm("")}
+                              >
+                                Clear Search
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }

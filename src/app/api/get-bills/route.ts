@@ -13,8 +13,10 @@ export async function GET(request: Request) {
 
   try {
     const bills = await prisma.bills.findMany({
-      where: { User_id: Number(userId) },
-      orderBy: { Billing_startdate: 'desc' },
+      where: { 
+        User_id: Number(userId), 
+      },
+      orderBy: { Billing_startdate: 'asc' },
     });
 
     // แปลงข้อมูลในรูปแบบที่ client ต้องการ
@@ -30,11 +32,13 @@ export async function GET(request: Request) {
         bill: {
           Bill_id: bill.Bill_id,
           User_id: bill.User_id,
+          MT5_accountid: bill.MT5_accountid,
           Billing_startdate: bill.Billing_startdate,
           Billing_enddate: bill.Billing_enddate,
           status: bill.status,
           Balance: bill.Balance,
           Deals_count: bill.Deals_count,
+          bill_show: bill.Bill_show,
         },
         deals,
         totalProfit,

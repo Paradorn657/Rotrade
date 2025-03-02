@@ -16,7 +16,7 @@ export async function GET(req: any) {
         where: {
             user_id: parseInt(session.user.id, 10),
             // model_id: null,         // ตรวจสอบว่า model_id เป็น null
-            status: "Connected",    // ตรวจสอบว่า status เป็น "Connected"
+            // status: "Connected",    // ตรวจสอบว่า status เป็น "Connected"
           },
 
     });

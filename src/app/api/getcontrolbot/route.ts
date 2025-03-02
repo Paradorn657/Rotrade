@@ -16,7 +16,6 @@ export async function GET(request:Request) {
     const mt5Accounts = await prisma.mt5Account.findMany({
       where: {
         user_id: parseInt(user_id),  // เปลี่ยนเป็นตัวเลขตามรูปแบบฐานข้อมูล
-        status: "Connected",
         model_id: {
             not: null,  // เลือกเฉพาะแถวที่ model_id ไม่ใช่ null
           },

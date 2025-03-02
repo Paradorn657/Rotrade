@@ -189,9 +189,9 @@ const BotPresets = () => {
                     <SelectValue placeholder="Choose an account" />
                   </SelectTrigger>
                   <SelectContent>
-                    {accounts.map((account, index) => (
+                    {accounts.map((account:any, index) => (
                       <SelectItem key={index} value={JSON.stringify(account)}>
-                        {account.MT5_accountid}
+                        {account.MT5_accountid} ({account.MT5_name})
                       </SelectItem>
                     ))}
                   </SelectContent>

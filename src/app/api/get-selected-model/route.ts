@@ -19,7 +19,8 @@ export async function GET(request: Request) {
         const account = await prisma.mt5Account.findUnique({
             where: { 
                 api_token: api_token || "null",
-                MT5_accountid:accountId
+                MT5_accountid:accountId,
+                signal_status:"ON"
             },
             include: { model: true }, // ดึงข้อมูล Model ที่เชื่อมอยู่
         });

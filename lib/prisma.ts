@@ -14,4 +14,28 @@ export const prisma =
     log: ['query']
   })
 
+// ✅ เพิ่ม Middleware ที่นี่
+prisma.$use(async (params, next) => {
+  if (params.model === "mt5Account" && params.action === "create") {
+    const data = params.args.data;
+
+    // ตรวจสอบว่า last_billed ยังไม่มีค่า
+    if (!data.last_billed) {
+      // ดึงข้อมูล create_at ของ User
+      const user = await prisma.user.findUnique({
+        where: { id: data.user_id },
+        select: { create_at: true },
+      });
+
+      // ถ้ามี user ให้กำหนดค่า last_billed เท่ากับ create_at
+      if (user) {
+        data.last_billed = user.create_at;
+      } else {
+        data.last_billed = new Date(); // fallback เป็นวันปัจจุบัน
+      }
+    }
+  }
+  return next(params);
+});
+
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

@@ -115,6 +115,10 @@ export default function Admin() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Track the selected user ID instead of using boolean flags
+  const [selectedUserForDetails, setSelectedUserForDetails] = useState(null);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -307,11 +311,11 @@ export default function Admin() {
                             <MoreVertical className="w-5 h-5 text-gray-500 hover:text-gray-700" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
-                            <DropdownMenuItem  className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => setIsDetailsOpen(true)}>
+                            <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => setSelectedUserForDetails(user.id)}>
                               <Eye className="w-4 h-4 text-blue-600" />
                               <span>View Details</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => setIsEditOpen(true)} >
+                            <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100" onClick={() => setSelectedUserForEdit(user.id)} >
                               <Edit className="w-4 h-4 text-green-600" />
                               <span>Edit User</span>
                             </DropdownMenuItem>
@@ -323,15 +327,28 @@ export default function Admin() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
-                      <EditUserDialog user={user} isOpen={isEditOpen} setIsOpen={setIsEditOpen} />
-                      <UserDetailsModal
-                        isOpen={isDetailsOpen}
-                        setIsOpen={setIsDetailsOpen}
-                        user={user}
-                      />
+                      
                     </tr>
                   ))}
+
+
                 </tbody>
+
+                {selectedUserForEdit !== null && (
+                        <EditUserDialog
+                          user={users.find((user: any) => user.id === selectedUserForEdit)}
+                          isOpen={selectedUserForEdit !== null}
+                          setIsOpen={() => setSelectedUserForEdit(null)}
+                        />
+                      )}
+
+                      {selectedUserForDetails !== null && (
+                        <UserDetailsModal
+                          isOpen={selectedUserForDetails !== null}
+                          setIsOpen={() => setSelectedUserForDetails(null)}
+                          user={users.find((user: any) => user.id === selectedUserForDetails)}
+                        />
+                      )}
               </table>
             </div>
           </Card>

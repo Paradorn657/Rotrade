@@ -3,6 +3,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { revalidatePath } from 'next/cache';
 
 export default function Login() {
     const router = useRouter();
@@ -27,16 +28,17 @@ export default function Login() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-
-        validateForm(name, value);
+        
+        // ใช้ค่าใหม่ที่เพิ่งอัปเดต เพื่อลดปัญหา async
+        setFormData((prev) => {
+            const updatedFormData = { ...prev, [name]: value };
+    
+            validateForm(name, value, updatedFormData);
+            return updatedFormData;
+        });
     };
 
-    const validateForm = (name: string, value: string) => {
+    const validateForm = (name: string, value: string, updatedFormData: { email: string; password: string; }) => {
         let updatedErrors = { ...errors };
 
         switch (name) {
@@ -53,12 +55,12 @@ export default function Login() {
         }
 
         setErrors(updatedErrors);
-        checkFormValidity(updatedErrors);
+        checkFormValidity(updatedErrors, updatedFormData);
     };
 
-    const checkFormValidity = (errors: any) => {
+    const checkFormValidity = (errors: any, updatedFormData: any) => {
         const isValid = Object.values(errors).every((error) => error === '') && 
-                       formData.email.length > 0 && formData.password.length >= 6;
+                       updatedFormData.email.length > 0 && updatedFormData.password.length >= 6;
         setIsFormValid(isValid);
     };
 
@@ -79,7 +81,8 @@ export default function Login() {
                     setAuthError('Invalid email or password. Please try again.');
                     console.log(signInData.error);
                 } else {
-                    router.push('/dashboard');
+                    // revalidatePath('/Dashboard');
+                    router.push('/Dashboard');
                 }
             } catch (error) {
                 setAuthError('An error occurred. Please try again later.');
@@ -272,7 +275,7 @@ export default function Login() {
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between">
+                            {/* <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <div className="relative">
                                         <input
@@ -291,7 +294,7 @@ export default function Login() {
                                         Forgot your password?
                                     </Link>
                                 </div>
-                            </div>
+                            </div> */}
 
                             <button
                                 type="submit"
