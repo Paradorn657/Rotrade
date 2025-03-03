@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         }
 
         // ส่งชื่อ Model กลับไป
-        return NextResponse.json({ model_name: account.model.name });
+        return NextResponse.json({ model_name: account.model.name ,model_version: `v${account.model.version.toFixed(1)}`});
     } catch (error) {
         console.error("Error fetching model name:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
