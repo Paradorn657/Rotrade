@@ -19,10 +19,13 @@ import { Button } from "@/components/ui/button";
 import LoginRedirect from "@/components/loginredirect";
 
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
+import { version } from "os";
 
 export default function ControlPanel() {
     const router = useRouter();  
-  const [robotStatus, setRobotStatus] = useState<{ 
+  const [robotStatus, setRobotStatus] = useState<{
+    version: string; 
     id: string; 
     name: string; 
     mt5Id: string; 
@@ -45,6 +48,7 @@ export default function ControlPanel() {
           setRobotStatus(data.map((account) => ({
             id: account.MT5_id,
             name: account.model.name,
+            version: account.model.version,
             mt5Id: account.MT5_accountid,
             balance: account.balance,
             mt5name: account.MT5_name,
@@ -81,6 +85,23 @@ export default function ControlPanel() {
           signal_status: newStatus,
         }),
       });
+
+      if (response.status === 403) {
+        toast.error(
+          <div className="flex flex-col gap-2 w-auto">
+            <p>Your account has been suspended for overbilling. You can continue by paying the bill.</p>
+            
+          </div>,
+          { duration: 10000 }
+        );
+        setRobotStatus((prev) =>
+          prev.map((robot) =>
+            robot.id === id ? { ...robot, signalStatus: currentStatus } : robot
+          )
+        );
+        return;
+      }
+
       setRobotStatus((prev) =>
         prev.map((robot) =>
           robot.id === id ? { ...robot, signalStatus: currentStatus } : robot
@@ -113,7 +134,9 @@ export default function ControlPanel() {
   } 
 
   return (
+    
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <Toaster position="top-center" />
       <div className="max-w-7xl mx-auto">
         <Card className="border border-gray-200 bg-white shadow-md">
           <CardHeader className="border-b border-gray-100 pb-6">
@@ -164,6 +187,7 @@ export default function ControlPanel() {
                   <TableHeader>
                     <TableRow className="bg-gray-50 hover:bg-gray-50">
                       <TableHead className="text-gray-600 font-medium">Bot Name</TableHead>
+                      <TableHead className="text-gray-600 font-medium">Version</TableHead>
                       <TableHead className="text-gray-600 font-medium">MT5 ID</TableHead>
                       <TableHead className="text-gray-600 font-medium">MT5 Name</TableHead>
                       <TableHead className="text-gray-600 font-medium">Balance</TableHead>
@@ -180,6 +204,7 @@ export default function ControlPanel() {
                           className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                         >
                           <TableCell className="font-medium text-gray-800">{robot.name}</TableCell>
+                          <TableCell className="font-medium text-gray-800">{robot.version}</TableCell>
                           <TableCell className="text-gray-600">{robot.mt5Id}</TableCell>
                           <TableCell className="text-gray-600">{robot.mt5name}</TableCell>
                           <TableCell className="font-medium text-gray-800">{robot.balance}</TableCell>

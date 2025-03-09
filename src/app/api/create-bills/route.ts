@@ -39,12 +39,21 @@ export async function POST(req: Request) {
         where: { id: userId },
         data: { role: "BAN" }
       });
+
+      //ปิดสัญญานเทรดทั้งหมด ถ้าโดนแบน
+
+      await prisma.mt5Account.updateMany({
+        where: { user_id: userId },
+        data: { signal_status: "OFF" }
+      });
     }
 
 
 
+
+
     // ตรวจหาวันที่เก่าสุด และวันที่ใหม่สุดจากดีล
-    const timestamps = deals.map(deal => deal.time * 1000);
+    const timestamps = deals.map((deal: { time: number; }) => deal.time * 1000);
     const minDate = new Date(Math.min(...timestamps));
     const maxDate = new Date(Math.max(...timestamps));
 

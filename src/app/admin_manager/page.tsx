@@ -112,7 +112,7 @@ export default function Admin() {
   const { data: session } = useSession();
   console.log("session at admin", session);
   const [stats, setStats] = useState<any>([]);
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<{ id: number; name: string; email: string; create_at: string; role: string; }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Track the selected user ID instead of using boolean flags
@@ -190,7 +190,12 @@ export default function Admin() {
     fetchData();
   }, [isEditOpen]);
 
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 p-8">
       {/* Page Header */}
@@ -230,6 +235,8 @@ export default function Admin() {
                     <input
                       type="text"
                       placeholder="Search..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
@@ -293,7 +300,7 @@ export default function Admin() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user: any) => (
+                  {filteredUsers.map((user: any) => (
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{user.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
@@ -327,7 +334,7 @@ export default function Admin() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
-                      
+
                     </tr>
                   ))}
 
@@ -335,20 +342,20 @@ export default function Admin() {
                 </tbody>
 
                 {selectedUserForEdit !== null && (
-                        <EditUserDialog
-                          user={users.find((user: any) => user.id === selectedUserForEdit)}
-                          isOpen={selectedUserForEdit !== null}
-                          setIsOpen={() => setSelectedUserForEdit(null)}
-                        />
-                      )}
+                  <EditUserDialog
+                    user={users.find((user: any) => user.id === selectedUserForEdit)}
+                    isOpen={selectedUserForEdit !== null}
+                    setIsOpen={() => setSelectedUserForEdit(null)}
+                  />
+                )}
 
-                      {selectedUserForDetails !== null && (
-                        <UserDetailsModal
-                          isOpen={selectedUserForDetails !== null}
-                          setIsOpen={() => setSelectedUserForDetails(null)}
-                          user={users.find((user: any) => user.id === selectedUserForDetails)}
-                        />
-                      )}
+                {selectedUserForDetails !== null && (
+                  <UserDetailsModal
+                    isOpen={selectedUserForDetails !== null}
+                    setIsOpen={() => setSelectedUserForDetails(null)}
+                    user={users.find((user: any) => user.id === selectedUserForDetails)}
+                  />
+                )}
               </table>
             </div>
           </Card>

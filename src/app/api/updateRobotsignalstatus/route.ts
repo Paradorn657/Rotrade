@@ -12,6 +12,17 @@ export async function POST(req: Request) {
         }
 
         // อัปเดต signal_status ในฐานข้อมูล
+        const MT5 = await prisma.mt5Account.findUnique({
+            where: { MT5_id: id },
+            include: { user: true },
+        })
+        console.log(MT5?.user.role)
+
+        
+        if (MT5?.user.role === "BAN") {
+            return NextResponse.json({ error: "Banned user can not update signal status" }, { status: 403 });
+        }
+
         const updatedAccount = await prisma.mt5Account.update({
             where: { MT5_id: id },
             data: { signal_status }, // ค่าใหม่ที่รับเข้ามา
