@@ -348,14 +348,32 @@ const BillingList = () => {
                   <DialogTitle className="text-xl font-semibold text-gray-900">
                     รายละเอียดบิล #{selectedBill.bill.Bill_id} (MT5 ID {selectedBill.bill.MT5_accountid})
                   </DialogTitle>
-                  
+
 
                   <DialogDescription className="text-sm text-gray-500 mt-1">
-                    ช่วงเวลา: {new Date(selectedBill.bill.Billing_startdate).toLocaleDateString('th-TH')} - {new Date(selectedBill.bill.Billing_enddate).toLocaleDateString('th-TH')}
+                    ช่วงเวลา: {new Date(selectedBill.bill.Billing_startdate).toLocaleString('th-TH', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hourCycle: 'h23', // ใช้ระบบ 24 ชั่วโมง
+                    })} -
+                    {new Date(selectedBill.bill.Billing_enddate).toLocaleString('th-TH', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hourCycle: 'h23',
+                    })}
                   </DialogDescription>
 
+
                 </div>
-                
+
                 {selectedBill.bill.bill_show === false ? (
                   <Badge className="ml-auto bg-gray-50 text-gray-700 border-gray-200 font-medium">
                     ไม่ต้องชำระ
@@ -445,12 +463,13 @@ const BillingList = () => {
                           <td className="px-4 py-3 text-sm text-gray-700">{formatCurrency(deal.price)}</td>
                           <td className="px-4 py-3 text-sm font-medium text-green-600">{formatCurrency(deal.profit)}</td>
                           <td className="px-4 py-3 text-sm text-gray-500">
-                            {new Date(deal.time * 1000).toLocaleString('th-TH', {
+                            {new Date((deal.time * 1000) - (2 * 60 * 60 * 1000)).toLocaleString('th-TH', {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',
                               hour: '2-digit',
-                              minute: '2-digit'
+                              minute: '2-digit',
+                              timeZoneName: 'short'
                             })}
                           </td>
                         </tr>

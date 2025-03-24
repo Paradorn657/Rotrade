@@ -209,7 +209,7 @@ export default function ControlPanel() {
                           <TableCell className="text-gray-600">{robot.mt5name}</TableCell>
                           <TableCell className="font-medium text-gray-800">{robot.balance}</TableCell>
                           <TableCell>
-                            {robot.status === "CONNECTED" ? (
+                            {robot.status === "Connected" ? (
                               <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                                 <span className="text-sm text-green-600">Connected</span>

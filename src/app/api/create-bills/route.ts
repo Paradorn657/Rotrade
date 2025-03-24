@@ -27,7 +27,8 @@ export async function POST(req: Request) {
     const unpaidBillsCount = await prisma.bills.count({
       where: {
         User_id: userId,
-        status: "Unpaid"
+        status: "Unpaid",
+        Bill_show:true
       }
     });
 
@@ -53,28 +54,30 @@ export async function POST(req: Request) {
 
 
     // ตรวจหาวันที่เก่าสุด และวันที่ใหม่สุดจากดีล
-    const timestamps = deals.map((deal: { time: number; }) => deal.time * 1000);
+    // ปรับ timestamp จาก GMT+2 ให้เป็น UTC
+    const timestamps = deals.map((deal: { time: number; }) => (deal.time * 1000) - (2 * 60 * 60 * 1000));
     const minDate = new Date(Math.min(...timestamps));
     const maxDate = new Date(Math.max(...timestamps));
 
     let currentStart = new Date(minDate);
     let bills = [];
-    console.log('mindate:', minDate, "maxDate: ", maxDate);
+    console.log('mindate:', minDate.toISOString(), "maxDate:", maxDate.toISOString());
+
     while (currentStart <= maxDate) {
       let currentEnd = new Date(currentStart);
-      currentEnd.setDate(currentEnd.getDate() + 3);
+      // เพิ่มเวลา 1 นาทีในรูปแบบ UTC
+      currentEnd.setUTCMinutes(currentEnd.getUTCMinutes() + 1);
 
       if (currentEnd > maxDate) {
-        console.log('currentEnd > maxDate ', maxDate, " - ", currentEnd);
+        console.log('currentEnd > maxDate', maxDate.toISOString(), " - ", currentEnd.toISOString());
         break;
       }
 
-      // ตรวจสอบว่าช่วง [currentStart, currentEnd] มีการทับซ้อนกับบิลใดที่มีอยู่แล้วหรือไม่
+      // ตรวจสอบว่าช่วง [currentStart, currentEnd] มีการทับซ้อนกับบิลที่มีอยู่หรือไม่
       const existingBill = await prisma.bills.findFirst({
         where: {
           User_id: userId,
           MT5_accountid: mt5AccountId,
-          // ตรวจสอบว่า ช่วงเวลาบิลเก่าทับซ้อนกับช่วงใหม่หรือไม่
           Billing_startdate: { lt: currentEnd },
           Billing_enddate: { gt: currentStart },
         },
@@ -84,14 +87,13 @@ export async function POST(req: Request) {
         console.log(`พบบิลซ้ำของ MT5 ${mt5AccountId} ในช่วง ${currentStart.toISOString()} - ${currentEnd.toISOString()} ไม่สร้างซ้ำ`);
       } else {
         const filteredDeals = deals.filter(deal => {
-          const dealDate = new Date(deal.time * 1000);
+          // ปรับ timestamp จาก GMT+2 เป็น UTC ก่อนเปรียบเทียบ
+          const dealDate = new Date((deal.time * 1000) - (2 * 60 * 60 * 1000));
           return dealDate >= currentStart && dealDate <= currentEnd;
         });
 
         const totalProfit = filteredDeals.reduce((sum, deal) => sum + deal.profit, 0);
-
         const dealCount = filteredDeals.length;
-
         let BILLSHOW;
 
         if (totalProfit > 0) {
@@ -115,7 +117,7 @@ export async function POST(req: Request) {
         } else if (totalProfit < 0) {
           console.log(`🔴 ขาดทุนในช่วง ${currentStart.toISOString()} - ${currentEnd.toISOString()}`);
           BILLSHOW = false;
-          const serviceFee = 0; // หรือคิดค่าบริการตามเงื่อนไขที่ต้องการสำหรับกรณีขาดทุน
+          const serviceFee = 0;
           const newBill = await prisma.bills.create({
             data: {
               User_id: userId,
@@ -131,13 +133,14 @@ export async function POST(req: Request) {
           });
           bills.push({ bill: newBill, deals: filteredDeals });
         } else {
-          // กรณี totalProfit = 0 พอดี
           console.log(`⚪ ไม่มีกำไรหรือขาดทุนในช่วง ${currentStart.toISOString()} - ${currentEnd.toISOString()}`);
           // ไม่สร้างบิล
         }
       }
-      currentStart.setDate(currentStart.getDate() + 3);
+      // อัปเดต currentStart เป็น currentEnd เพื่อให้ช่วงต่อเนื่อง
+      currentStart = new Date(currentEnd);
     }
+
 
     return NextResponse.json({ message: "Bills created successfully", bills });
   } catch (error) {

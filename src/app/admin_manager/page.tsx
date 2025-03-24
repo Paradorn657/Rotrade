@@ -29,6 +29,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import EditUserDialog from '@/components/edituserDialog';
 import UserDetailsModal from '@/components/userdetailModal';
+import { useRouter } from 'next/navigation';
+import SimpleSpinner from '@/components/Loadingspinner';
 
 const LoadingHeader = () => (
   <div className="mb-10">
@@ -109,7 +111,7 @@ const LoadingTable = () => (
 
 
 export default function Admin() {
-  const { data: session } = useSession();
+  const { data: session,status } = useSession();
   console.log("session at admin", session);
   const [stats, setStats] = useState<any>([]);
   const [users, setUsers] = useState<{ id: number; name: string; email: string; create_at: string; role: string; }[]>([]);
@@ -118,6 +120,24 @@ export default function Admin() {
   // Track the selected user ID instead of using boolean flags
   const [selectedUserForDetails, setSelectedUserForDetails] = useState(null);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === "loading") return; // ยังโหลด session อยู่
+
+    if (!session || session.user.role !== "admin") {
+      router.replace("/"); // ใช้ replace แทน push (ไม่ให้กลับมาได้)
+    } else {
+      setLoading(false); // โหลดเสร็จแล้ว แสดง UI
+    }
+  }, [session, status, router]);
+
+  if (loading) {
+      return <SimpleSpinner />;
+  }
+
+
 
   const fetchData = async () => {
     setIsLoading(true);
