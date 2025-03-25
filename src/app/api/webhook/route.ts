@@ -36,30 +36,9 @@ export async function POST(req: NextRequest, res: NextResponse) {
             },
             data: {
                 status: "Paid",
+                Paid_at: new Date(),
             }
         })
-
-        const mtAccount = await prisma.mt5Account.findFirst({
-            where: {
-                user_id: Number(paymentIntent.metadata.userId),
-                MT5_accountid: paymentIntent.metadata.forMT5id
-            }
-        });
-        
-        // ถ้าพบข้อมูล จึงอัปเดต
-        if (mtAccount) {
-            await prisma.mt5Account.update({
-                where: {
-                    MT5_id: mtAccount.MT5_id
-                },
-                data: {
-                    last_billed: new Date()
-                }
-            });
-            console.log(`🟢 อัปเดต last_billed สำหรับ MT5_id: ${mtAccount.MT5_id} สำเร็จ`);
-        } else {
-            console.log(`❌ ไม่พบข้อมูล mt5Account สำหรับ user_id: ${paymentIntent.metadata.userId} และ MT5_accountid: ${paymentIntent.metadata.forMT5id}`);
-        }
 
         const userId = paymentIntent.metadata.userId;
         const unpaidBillsCount = await prisma.bills.count({

@@ -43,10 +43,13 @@ model User {
 model Model{
   Model_id   Int         @id @default(autoincrement())
   name String
-  version Float
+  version Float @default(1.0)
   Update_at DateTime     @default(now())
   numberofuse Int @default(0)
   mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
+  winrate Float?
+  balance_drawdown Float?
+  equity_drawdown Float?
 }
 
 
@@ -63,5 +66,6 @@ model Bills{
   Deals_count        Int
   dealsData          Json   // เพิ่ม field นี้เพื่อเก็บ JSON ของ filteredDeals (optional)
   Bill_show         Boolean @default(false)
+  Paid_at DateTime?
   user User @relation(fields: [User_id], references: [id])
 }

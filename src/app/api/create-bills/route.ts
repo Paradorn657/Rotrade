@@ -63,6 +63,7 @@ export async function POST(req: Request) {
     let bills = [];
     console.log('mindate:', minDate.toISOString(), "maxDate:", maxDate.toISOString());
 
+    let lastBilledDate: Date | null = null; // ตัวแปรเก็บวันที่ตัดบิลรอบสุดท้าย
     while (currentStart <= maxDate) {
       let currentEnd = new Date(currentStart);
       // เพิ่มเวลา 1 นาทีในรูปแบบ UTC
@@ -132,6 +133,7 @@ export async function POST(req: Request) {
             },
           });
           bills.push({ bill: newBill, deals: filteredDeals });
+          lastBilledDate = currentEnd; // อัปเดตวันที่ตัดบิลล่าสุด
         } else {
           console.log(`⚪ ไม่มีกำไรหรือขาดทุนในช่วง ${currentStart.toISOString()} - ${currentEnd.toISOString()}`);
           // ไม่สร้างบิล
@@ -139,6 +141,15 @@ export async function POST(req: Request) {
       }
       // อัปเดต currentStart เป็น currentEnd เพื่อให้ช่วงต่อเนื่อง
       currentStart = new Date(currentEnd);
+    }
+
+    // อัปเดต last_billed เป็น currentEnd ของบิลสุดท้ายที่ถูกสร้าง
+    if (lastBilledDate) {
+      await prisma.mt5Account.update({
+        where: { MT5_id: Number(mt5AccountId), api_token: token },
+        data: { last_billed: lastBilledDate },
+      });
+      console.log(`อัปเดต last_billed ของ MT5 ${mt5AccountId} เป็น ${lastBilledDate.toISOString()}`);
     }
 
 

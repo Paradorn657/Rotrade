@@ -19,6 +19,9 @@ export async function POST(req: Request) {
         version: body.version,
         Update_at: new Date(),
         numberofuse: body.numberofuse || 0,
+        winrate:body.win_rate || 0,
+        balance_drawdown:body.balance_drawdown || 0,
+        equity_drawdown:body.equity_drawdown || 0,
       },
     });
 
