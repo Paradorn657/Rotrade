@@ -35,6 +35,7 @@ export async function GET(request: Request) {
           MT5_accountid: bill.MT5_accountid,
           Billing_startdate: bill.Billing_startdate,
           Billing_enddate: bill.Billing_enddate,
+          Paid_at:bill.Paid_at,
           status: bill.status,
           Balance: bill.Balance,
           Deals_count: bill.Deals_count,

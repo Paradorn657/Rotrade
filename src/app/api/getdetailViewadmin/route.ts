@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       });
 
       const bills = await prisma.bills.findMany({
-        where: { User_id: parseInt(userId)},
+        where: { User_id: parseInt(userId),Bill_show: true },
         include: { user: true },
       });
 
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
             amount: bill.Balance,
             date: formatDate(bill.Billing_startdate),
             description: `Bill #INV-${bill.Bill_id}`,
-            paidDate: formatDate(bill.Billing_enddate),
+            paidDate: bill.Paid_at ? new Date(bill.Paid_at) : "N/A",
           })),
       };
   

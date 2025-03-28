@@ -11,7 +11,8 @@ import {
   Edit,
   Trash2,
   Search,
-  Plus
+  Plus,
+  Settings
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -32,6 +33,7 @@ import UserDetailsModal from '@/components/userdetailModal';
 import { useRouter } from 'next/navigation';
 import SimpleSpinner from '@/components/Loadingspinner';
 import Link from 'next/link';
+import ModelStatsModal from '@/components/EditModelstats';
 
 const LoadingHeader = () => (
   <div className="mb-10">
@@ -195,6 +197,8 @@ export default function Admin() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
+  const [isEditmodelOpen, setisEditmodelOpen] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, [isEditOpen]);
@@ -301,19 +305,14 @@ export default function Admin() {
                     <div className="p-2 bg-blue-100 rounded-lg">
                       <Users className="w-6 h-6 text-blue-600" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800">Users Management</h3>
+                    <h3 className="text-xl font-bold text-gray-800">Users and Models Management  </h3>
                   </div>
                   <div className="flex space-x-2">
-                    <a href='/addstatsmodel'>
-                    <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                      <Plus className="w-5 h-5" />
-                      <span>Add Model statistics</span>
+                    <button onClick={() => setisEditmodelOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                      <Settings />
+                      <span>Edit Model statistics</span>
                     </button>
-                    </a>
-                    <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                      <Plus className="w-5 h-5" />
-                      <span>Add User</span>
-                    </button>
+                    <ModelStatsModal isOpen={isEditmodelOpen} setIsOpen={setisEditmodelOpen} />
                   </div>
                 </div>
               </div>
@@ -384,7 +383,15 @@ export default function Admin() {
                     <UserDetailsModal
                       isOpen={selectedUserForDetails !== null}
                       setIsOpen={() => setSelectedUserForDetails(null)}
-                      user={users.find((user: any) => user.id === selectedUserForDetails)}
+                      user={
+                        users.find((user: any) => user.id === selectedUserForDetails)
+                          ? {
+                              id: users.find((user: any) => user.id === selectedUserForDetails)?.id.toString() || "",
+                              name: users.find((user: any) => user.id === selectedUserForDetails)?.name || "Unknown",
+                              email: users.find((user: any) => user.id === selectedUserForDetails)?.email || "Unknown",
+                            }
+                          : { id: "", name: "Unknown", email: "Unknown" }
+                      }
                     />
                   )}
                 </table>

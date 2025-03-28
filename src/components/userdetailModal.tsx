@@ -8,9 +8,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-    Link2, XCircle, Power, User, Calendar, DollarSign, 
-    Clock, Wallet, TrendingUp, CreditCard, AlertCircle, 
+import {
+    Link2, XCircle, Power, User, Calendar, DollarSign,
+    Clock, Wallet, TrendingUp, CreditCard, AlertCircle,
     CheckCircle, ChevronRight, Shield, BarChart4
 } from 'lucide-react';
 
@@ -32,14 +32,24 @@ interface Bill {
     paidDate?: string | "-"; // optional ถ้ายังไม่จ่าย
 }
 
-const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
+interface UserDetailsModalProps {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+    };
+}
+
+const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ isOpen, setIsOpen, user }) => {
     const [mt5Accounts, setMt5Accounts] = useState<MT5Account[]>([]);
     const [bills, setBills] = useState({ pending: [], paid: [] });
     const [loading, setLoading] = useState(true);
 
     const fetchdata = async () => {
         if (!user?.id) return;
-        
+
         setLoading(true);
         try {
             const response = await fetch(`/api/getdetailViewadmin?user_id=${user.id}`);
@@ -54,7 +64,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                 isSignalOn: account.signal_status === "ON",
                 type: account.account_type || "Standard"
             }));
-            
+
             setMt5Accounts(userAccounts || []);
             setBills(data.transformedBills || { pending: [], paid: [] });
         } catch (error) {
@@ -70,7 +80,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
         }
     }, [user, isOpen]);
 
-    const getAccountStatusColor = (account) => {
+    const getAccountStatusColor = (account: any) => {
         if (account.hasModel && account.isSignalOn) return "bg-gradient-to-r from-green-50 to-emerald-50 border-emerald-100";
         if (account.hasModel) return "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100";
         return "bg-white border-gray-100";
@@ -138,10 +148,10 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                             <h3 className="text-lg font-semibold text-gray-800">Trading Accounts</h3>
                             <div className="h-px flex-1 bg-gray-200"></div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             {mt5Accounts.map((account) => (
-                                <div 
+                                <div
                                     key={account.login}
                                     className={`rounded-xl p-5 border shadow-sm hover:shadow-md transition-all duration-200 ${getAccountStatusColor(account)}`}
                                 >
@@ -171,7 +181,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                                             </Badge>
                                         )}
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4 mt-2">
                                         <div className="bg-white/80 rounded-lg p-3 flex items-center gap-3 border border-gray-100">
                                             <div className={`p-2 rounded-full ${account.balance > 0 ? 'bg-green-100' : 'bg-gray-100'}`}>
@@ -184,7 +194,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                                                 </p>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="bg-white/80 rounded-lg p-3 flex items-center gap-3 border border-gray-100">
                                             <div className={`p-2 rounded-full ${account.isSignalOn ? 'bg-blue-100' : 'bg-gray-100'}`}>
                                                 <Power className={`w-4 h-4 ${account.isSignalOn ? 'text-blue-600' : 'text-gray-500'}`} />
@@ -199,7 +209,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                                     </div>
                                 </div>
                             ))}
-                            
+
                             {mt5Accounts.length === 0 && !loading && (
                                 <div className="col-span-2 bg-gray-50 rounded-xl p-6 text-center">
                                     <p className="text-gray-500">No trading accounts found for this user.</p>
@@ -215,7 +225,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                             <h3 className="text-lg font-semibold text-gray-800">Billing History</h3>
                             <div className="h-px flex-1 bg-gray-200"></div>
                         </div>
-                        
+
                         <Tabs defaultValue="pending" className="w-full">
                             <TabsList className="w-full grid grid-cols-2 gap-2 bg-gray-100/50 p-1 rounded-lg mb-4">
                                 <TabsTrigger
@@ -266,7 +276,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                                             </div>
                                         </div>
                                     ))}
-                                    
+
                                     {bills.pending.length === 0 && (
                                         <div className="bg-gray-50 rounded-xl p-6 text-center">
                                             <p className="text-gray-500">No pending bills found.</p>
@@ -289,7 +299,15 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                                                             <p className="text-sm font-medium text-gray-800">{bill.description}</p>
                                                             <div className="flex items-center gap-1 text-gray-500 mt-1">
                                                                 <Calendar className="w-3 h-3" />
-                                                                <span className="text-xs">Paid on {bill.paidDate}</span>
+                                                                <span className="text-xs">Paid on {bill.paidDate ? new Date(bill.paidDate).toLocaleString('th-TH', {
+                                                                    year: 'numeric',
+                                                                    month: 'long',
+                                                                    day: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                    second: '2-digit',
+                                                                    hour12: false
+                                                                }) : "N/A"}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -305,7 +323,7 @@ const UserDetailsModal = ({ isOpen, setIsOpen, user }) => {
                                             </div>
                                         </div>
                                     ))}
-                                    
+
                                     {bills.paid.length === 0 && (
                                         <div className="bg-gray-50 rounded-xl p-6 text-center">
                                             <p className="text-gray-500">No payment history found.</p>

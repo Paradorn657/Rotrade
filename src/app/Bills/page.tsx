@@ -33,6 +33,7 @@ interface Deal {
 }
 
 interface Bill {
+  [x: string]: string;
   Bill_id: number;
   User_id: number;
   MT5_accountid: string;
@@ -99,6 +100,7 @@ const BillingList = () => {
                 MT5_accountid: item.bill.MT5_accountid,
                 Billing_startdate: item.bill.Billing_startdate,
                 Billing_enddate: item.bill.Billing_enddate,
+                Paid_at: item.bill.Paid_at,
                 status: item.bill.status,
                 Balance: item.bill.Balance,
                 Deals_count: item.bill.Deals_count,
@@ -359,7 +361,8 @@ const BillingList = () => {
                       minute: '2-digit',
                       second: '2-digit',
                       hourCycle: 'h23', // ใช้ระบบ 24 ชั่วโมง
-                    })} -
+                    })}
+                    <span> ถึง </span>
                     {new Date(selectedBill.bill.Billing_enddate).toLocaleString('th-TH', {
                       year: 'numeric',
                       month: 'short',
@@ -380,12 +383,22 @@ const BillingList = () => {
                   </Badge>
                 ) : (
                   <Badge
-                    className={`ml-auto ${selectedBill.bill.status === 'PAID'
+                    className={`ml-auto ${selectedBill.bill.status === 'Paid'
                       ? 'bg-green-50 text-green-700 border-green-200'
                       : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}
                   >
-                    {selectedBill.bill.status === 'PAID' ? 'ชำระแล้ว' : 'รอชำระเงิน'}
+                    {selectedBill.bill.status === 'Paid'
+                      ? `ชำระแล้ว ณ วันที่ ${new Date(selectedBill.bill.Paid_at).toLocaleString('th-TH', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                      })}`
+                      : 'รอชำระเงิน'}
                   </Badge>
                 )}
               </div>
@@ -484,7 +497,7 @@ const BillingList = () => {
               <DialogClose asChild>
                 <Button variant="outline">ปิด</Button>
               </DialogClose>
-              {selectedBill.bill.status !== 'PAID' && selectedBill.bill.bill_show !== false && (
+              {selectedBill.bill.status !== 'Paid' && selectedBill.bill.bill_show !== false && (
                 <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={(e) => handlePayment(selectedBill)}>
                   <DollarSign className="h-4 w-4 mr-2" />
                   ชำระเงิน

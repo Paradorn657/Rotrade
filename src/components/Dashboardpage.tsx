@@ -5,7 +5,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { Clipboard } from "flowbite-react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { TrendingUp, Award, AlertTriangle, Percent, ChevronDown } from 'lucide-react';
+import { TrendingUp, Award, AlertTriangle, Percent, ChevronDown, Trash2 } from 'lucide-react';
 import { Label } from "@/components/ui/label"
 import { Sparkles, BarChart2, Clock } from 'lucide-react';
 import {
@@ -22,6 +22,7 @@ import { RefreshCcw } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js/auto';
 import { Session } from "next-auth";
 import { Bills } from "@prisma/client";
+import toast, { Toaster } from "react-hot-toast";
 
 
 
@@ -99,12 +100,18 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        alert(result.message || 'Failed to create Account');
+        toast.error(result.message || 'Failed to create Account');
       } else {
-        alert("Data successfully added!");
+        fetchAccounts(),
+          toast.success(
+            <div className="flex flex-col gap-2">
+              <p>Added MT5 Account</p>
+            </div>,
+            { duration: 5000 }
+          );
       }
     } catch (error) {
-      alert("Error creating data: MT5 ID ALREADY IN USE");
+      toast.error("Error creating data: MT5 ID ALREADY IN USE");
     }
   };
 
@@ -144,7 +151,7 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
     }
 
     console.log(`Number of Assets: ${accountNames.length}`);
-  }, [accountNames]);
+  }, [accountNames, loading]);
 
 
 
@@ -219,13 +226,13 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
     fetchAccounts();
     fetchUserData();
 
-    
+
 
   }, []);
 
 
 
-  
+
 
   const [user, setUser] = useState<any>();
   console.log("userbILL", user?.Bills)
@@ -246,11 +253,11 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
     return remainingMonths > 0 ? `${diffYears}y ${remainingMonths}m` : `${diffYears} years`;
   };
 
-  const generateHSLColor = (index) => {
+  const generateHSLColor = (index: any) => {
     const hue = (index * 36) % 360; // ปรับมุม Hue ให้แตกต่างกัน
     return `hsl(${hue}, 70%, 50%)`;  // Saturation 70%, Lightness 50%
   };
-  
+
 
   const [totalDeals, setTotalDeals] = useState(0);
   const [winDeals, setWinDeals] = useState(0);
@@ -278,8 +285,42 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
     setWinPercentage(total > 0 ? (win / total) * 100 : 0);
   }, [user]);
 
+
+
+
+
+  const DeleteMt5 = async (mt5id: Number) => {
+    try {
+      const respone = await fetch("/api/DeleteMt5", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ mt5_id: mt5id }),
+
+      });
+      if (respone.ok) {
+        const data = await respone.json();
+        setComfirmDelleteOpen(false);
+        fetchAccounts();
+
+        toast.success(
+          <div className="flex flex-col gap-2">
+            <p>Deleted MT5 Account {data.mt5.MT5_accountid}</p>
+          </div>,
+          { duration: 5000 }
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    }
+  }
+
+  const [isComfirmDelleteOpen, setComfirmDelleteOpen] = useState(false);
+
   return (
     <div className="flex flex-col h-screen">
+      <Toaster position="top-center" />
       <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-200 p-6">
         <div className="h-full flex flex-col md:flex-row gap-5">
           {/* Left Column - Profile and Performance */}
@@ -431,7 +472,7 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
               </div>
             </div>
 
-            
+
           </div>
         </div>
       </div>
@@ -531,6 +572,38 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{account.balance.toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onClick={() => setComfirmDelleteOpen(true)} className="px-3 py-1 text-white rounded-lg text-xs hover:bg-red-200 transition-all">
+                          <Trash2 className="text-red-900" />
+                        </button>
+
+                        {isComfirmDelleteOpen && (
+                          <div className="fixed inset-0 flex items-center justify-center z-50">
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-black opacity-50"></div>
+                            {/* Modal Container */}
+                            <div className="relative bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-sm z-10">
+                              <h2 className="text-xl font-bold mb-4">ยืนยันการลบ</h2>
+                              <p className="mb-6">คุณแน่ใจหรือไม่ที่จะลบบัญชี {account.MT5_accountid} นี้?</p>
+                              <div className="flex justify-end space-x-4">
+                                <button
+                                  onClick={() => setComfirmDelleteOpen(false)}
+                                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+                                >
+                                  ยกเลิก
+                                </button>
+                                <button
+                                  onClick={() => DeleteMt5(account.MT5_id)}
+                                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                                >
+                                  ลบ
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                      </td>
                     </tr>
                   ))}
                 </tbody>

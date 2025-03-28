@@ -8,6 +8,13 @@ export async function POST(request: NextRequest) {
   try {
     const { amount,usersession,selectedbill } = await request.json();
 
+    // ตรวจสอบว่าจำนวนเงินต้องไม่น้อยกว่า 1000 satang (10 บาท)
+    if (amount < 1000) {
+      return NextResponse.json(
+        { error: "Amount must be at least 1000 satang (10 THB)." },
+        { status: 400 }
+      );
+    }
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount,
       currency: "usd",

@@ -67,7 +67,8 @@ export async function POST(req: Request) {
     while (currentStart <= maxDate) {
       let currentEnd = new Date(currentStart);
       // เพิ่มเวลา 1 นาทีในรูปแบบ UTC
-      currentEnd.setUTCMinutes(currentEnd.getUTCMinutes() + 1);
+      // currentEnd.setUTCMinutes(currentEnd.getUTCMinutes() + 1);
+      currentEnd.setUTCDate(currentEnd.getUTCDate() + 7);
 
       if (currentEnd > maxDate) {
         console.log('currentEnd > maxDate', maxDate.toISOString(), " - ", currentEnd.toISOString());
@@ -146,7 +147,7 @@ export async function POST(req: Request) {
     // อัปเดต last_billed เป็น currentEnd ของบิลสุดท้ายที่ถูกสร้าง
     if (lastBilledDate) {
       await prisma.mt5Account.update({
-        where: { MT5_id: Number(mt5AccountId), api_token: token },
+        where: { MT5_accountid: String(mt5AccountId), api_token: String(token) },
         data: { last_billed: lastBilledDate },
       });
       console.log(`อัปเดต last_billed ของ MT5 ${mt5AccountId} เป็น ${lastBilledDate.toISOString()}`);
