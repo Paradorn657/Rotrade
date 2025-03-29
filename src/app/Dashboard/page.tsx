@@ -1,11 +1,9 @@
 "use client"
-import { getServerSession } from "next-auth/next";
 
 import MT5Dashboard from "@/components/Dashboardpage";
-import { authOptions } from "../../../lib/authOptions";
+import SimpleSpinner from "@/components/Loadingspinner";
 import LoginRedirect from "@/components/loginredirect";
 import { useSession } from "next-auth/react";
-import SimpleSpinner from "@/components/Loadingspinner";
 
 export default function Page() {
   const { status, data: session } = useSession();

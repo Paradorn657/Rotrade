@@ -40,7 +40,7 @@ export default function Signup() {
 
     // ฟังก์ชันตรวจสอบข้อผิดพลาดแบบ realtime
     const validateForm = (name: string, value: string) => {
-        let updatedErrors = { ...errors };
+        const updatedErrors = { ...errors };
 
         switch (name) {
             case 'email':
@@ -289,7 +289,7 @@ export default function Signup() {
                 </h2>
                 
                 <p className="text-blue-100 mb-8 leading-relaxed">
-                  Join thousands of successful traders who have already discovered the power of RoTrade's innovative platform.
+                  {`Join thousands of successful traders who have already discovered the power of RoTrade's innovative platform.`}
                 </p>
                 
                 <div className="space-y-4">
@@ -325,7 +325,7 @@ export default function Signup() {
                   <div className="flex items-center space-x-4">
                     
                     <div className="flex-1">
-                      <p className="text-sm">Let's <strong>try</strong> our Forex Robot now!!</p>
+                      <p className="text-sm">{`Let's`} <strong>try</strong> our Forex Robot now!!</p>
                     </div>
                   </div>
                 </div>

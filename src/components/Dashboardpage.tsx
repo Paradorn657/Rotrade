@@ -1,13 +1,7 @@
 "use client";
-import { randomBytes } from "crypto";
-import { useEffect, useState } from "react";
-import { Doughnut } from 'react-chartjs-2';
-import { Clipboard } from "flowbite-react";
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { TrendingUp, Award, AlertTriangle, Percent, ChevronDown, Trash2 } from 'lucide-react';
-import { Label } from "@/components/ui/label"
-import { Sparkles, BarChart2, Clock } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetClose,
@@ -17,17 +11,22 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import { RefreshCcw } from 'lucide-react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js/auto';
-import { Session } from "next-auth";
+} from "@/components/ui/sheet";
 import { Bills } from "@prisma/client";
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js/auto';
+import { randomBytes } from "crypto";
+import { Clipboard } from "flowbite-react";
+import { AlertTriangle, Award, BarChart2, Clock, Percent, RefreshCcw, Sparkles, Trash2, TrendingUp } from 'lucide-react';
+import { Session } from "next-auth";
+import { useEffect, useState } from "react";
+import { Doughnut } from 'react-chartjs-2';
 import toast, { Toaster } from "react-hot-toast";
 
 
 
 
 export function Component({ api_token }: { api_token: string }) {
+  
   const displayedToken = api_token.length > 10 ? api_token.slice(0, 10) + " ************" : api_token;
   return (
     <div className="grid w-52 max-w-64">
@@ -50,11 +49,11 @@ export function Component({ api_token }: { api_token: string }) {
 }
 
 const MT5Dashboard = ({ session }: { session: Session }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const [token, setToken] = useState("");
-  const [mt5InstanceId, setMt5InstanceId] = useState("");
   const [mt5Id, setMt5Id] = useState("");
   const [mt5Name, setMt5Name] = useState("");
+  const downloadLink = "https://drive.google.com/uc?export=download&id=16iSk1ocePMMmAD8jopkIQcdRScUQ_4XH";
 
 
   function generateRandomToken(length: number = 32): string {
@@ -102,15 +101,13 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
       if (!response.ok) {
         toast.error(result.message || 'Failed to create Account');
       } else {
-        fetchAccounts(),
-          toast.success(
-            <div className="flex flex-col gap-2">
-              <p>Added MT5 Account</p>
-            </div>,
-            { duration: 5000 }
-          );
+        fetchAccounts();
+        toast.success(
+          "Added MT5 Account",
+          { duration: 5000 }
+        );
       }
-    } catch (error) {
+    } catch {
       toast.error("Error creating data: MT5 ID ALREADY IN USE");
     }
   };
@@ -136,7 +133,6 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
 
   const [balances, setBalances] = useState<number[]>([]);
   const [accountNames, setAccountNames] = useState<string[]>([]);
-  const [totalBalance, setTotalBalance] = useState(0);
 
   const [chartText, setChartText] = useState("Loading...");
   useEffect(() => {
@@ -160,11 +156,9 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
     if (accounts.length > 0) {
       const newBalances = accounts.map((account: any) => account.balance);
       const newAccountNames = accounts.map((account: any) => account.MT5_name || account.MT5_accountid);
-      const newTotalBalance = newBalances.reduce((acc, balance) => acc + balance, 0);
 
       setBalances(newBalances);
       setAccountNames(newAccountNames);
-      setTotalBalance(newTotalBalance);
     }
   }, [accounts]);
 
@@ -289,7 +283,7 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
 
 
 
-  const DeleteMt5 = async (mt5id: Number) => {
+  const DeleteMt5 = async (mt5id: number) => {
     try {
       const respone = await fetch("/api/DeleteMt5", {
         method: "DELETE",
@@ -495,6 +489,10 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
                     Enter your MT5 details to generate a token.
                   </SheetDescription>
                 </SheetHeader>
+
+                <Button onClick={() => window.open(downloadLink , "_blank")}>
+                  Download API
+                </Button>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="mt5Id" className="text-left">MT5 ID</Label>

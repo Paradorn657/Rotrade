@@ -9,7 +9,7 @@ export default function TradingViewTicker() {
       symbols: [
         { proName: "FX:USDJPY", title: "USD/JPY" },
         { proName: "FX:EURUSD", title: "EUR/USD" },
-        { proName: "OANDA:XAUUSD", title: "Gold" }
+        { proName: "FX:GBPUSD", title: "GBP/USD" }
       ],
       colorTheme: "dark",
       isTransparent: true,

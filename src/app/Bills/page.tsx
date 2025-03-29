@@ -1,27 +1,26 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { getSession, useSession } from "next-auth/react";
-import { toast, Toaster } from 'react-hot-toast';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose
+  DialogTitle
 } from "@/components/ui/dialog";
+import { getSession, useSession } from "next-auth/react";
+import { useEffect, useState } from 'react';
+import { toast, Toaster } from 'react-hot-toast';
 
-import { FileText, DollarSign, AlertCircle, Calendar, ClipboardList, Loader2 } from "lucide-react";
+import SimpleSpinner from '@/components/Loadingspinner';
+import LoginRedirect from '@/components/loginredirect';
+import { CheckoutPage } from '@/components/Payment';
 import { Badge } from "@/components/ui/badge";
 import { Elements } from '@stripe/react-stripe-js';
-import { CheckoutPage } from '@/components/Payment';
 import { loadStripe } from '@stripe/stripe-js';
-import LoginRedirect from '@/components/loginredirect';
-import SimpleSpinner from '@/components/Loadingspinner';
+import { Calendar, ClipboardList, DollarSign, FileText, Loader2 } from "lucide-react";
 
 interface Deal {
   dealTicket: number;
@@ -33,15 +32,16 @@ interface Deal {
 }
 
 interface Bill {
-  [x: string]: string;
   Bill_id: number;
   User_id: number;
   MT5_accountid: string;
   Billing_startdate: string;
   Billing_enddate: string;
+  Paid_at: Date;
   status: string;
   Balance: number;
-  bill_show: boolean;
+  Deals_count: number;
+  bill_show: boolean | null;
 }
 
 interface BillData {
@@ -498,7 +498,7 @@ const BillingList = () => {
                 <Button variant="outline">ปิด</Button>
               </DialogClose>
               {selectedBill.bill.status !== 'Paid' && selectedBill.bill.bill_show !== false && (
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={(e) => handlePayment(selectedBill)}>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => handlePayment(selectedBill)}>
                   <DollarSign className="h-4 w-4 mr-2" />
                   ชำระเงิน
                 </Button>

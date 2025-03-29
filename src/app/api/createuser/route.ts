@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         });
 
         if (existingEmail) {
-            return NextResponse.json({ user: null, message: "email already used"}, {status: 409 })
+            return NextResponse.json({ user: null, message: "email already used" }, { status: 409 })
         }
 
         const existingUsername = await prisma.user.findFirst({
@@ -35,16 +35,12 @@ export async function POST(req: Request) {
             }
         })
 
-        const {password:newUserPassword , ...rest} = newUser;
-
-
-
-        return NextResponse.json({ user: rest, message: "User created success" }, { status: 201 });
+        return NextResponse.json({ user: { name: newUser.name, id: newUser.id, email: newUser.email, create_at: newUser.create_at, role: newUser.role }, message: "User created success " }, { status: 201 });
 
 
     } catch (error) {
 
-        return NextResponse.json({message: "Something went wrong!" }, { status: 500 });
+        return NextResponse.json({ message: "Something went wrong!"+error }, { status: 500 });
 
     }
 }

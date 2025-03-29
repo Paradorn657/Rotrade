@@ -1,18 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import { Badge } from "@/components/ui/badge";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
+    DialogTitle
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
-    Link2, XCircle, Power, User, Calendar, DollarSign,
-    Clock, Wallet, TrendingUp, CreditCard, AlertCircle,
-    CheckCircle, ChevronRight, Shield, BarChart4
+    AlertCircle,
+    BarChart4,
+    Calendar,
+    CheckCircle,
+    CreditCard,
+    DollarSign,
+    Power,
+    Shield,
+    User,
+    Wallet
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface MT5Account {
     id: string;

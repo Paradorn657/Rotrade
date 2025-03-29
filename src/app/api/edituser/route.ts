@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
 import { prisma } from "../../../../lib/prisma";
 
 // ใช้ POST แต่อัปเดตแทนการสร้างใหม่

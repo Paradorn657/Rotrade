@@ -1,12 +1,11 @@
 'use client';
 
-import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
+import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { Url } from "next/dist/shared/lib/router/router";
 import Link from "next/link";
-import { useContext, createContext, useState, ReactNode, useEffect } from "react";
 import { usePathname } from 'next/navigation';
-import { Session } from "next-auth";
-import { useSession } from "next-auth/react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 
 
@@ -28,12 +27,7 @@ interface SidebarProps {
 export default function Sidebar({ children }: SidebarProps) {
   const [expanded, setExpanded] = useState(true);
 
-  const [isClient, setIsClient] = useState(false)
  
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
   return (
     <aside
       className={`h-screen   transition-all ${expanded ? "flex-[0_0_12rem]" : "flex-[0_0_4rem]"

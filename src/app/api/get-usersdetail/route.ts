@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server"; // นำเข้า NextResponse
-import { getServerSession } from "next-auth";
 import { prisma } from "../../../../lib/prisma"; // หรือ import ตามที่คุณตั้งชื่อ prisma client ของคุณ
-import { authOptions } from "../../../../lib/authOptions";
-import { triggerAsyncId } from "async_hooks";
  // ตั้งค่า authOptions ของคุณ
 
 export async function GET(request:Request) {

@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../lib/prisma';
-import { authOptions } from '../../../../lib/authOptions';
-import { getServerSession } from 'next-auth';
 
 export async function POST(req: Request) {
   try {
@@ -25,7 +22,7 @@ export async function POST(req: Request) {
     console.log("Found account",mt5account.MT5_accountid);
     const newStatus = action === "connect" ? "Connected" : "Disconnected";
     const newBalance = action === "connect" ? balance : mt5account.balance;
-    const updatedAccount = await prisma.mt5Account.update({
+    await prisma.mt5Account.update({
         where: { api_token: token ,MT5_accountid:String(mt5_id)},  
         data: { status: newStatus ,
             balance:newBalance

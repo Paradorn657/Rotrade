@@ -11,7 +11,6 @@ import {
   Edit,
   Trash2,
   Search,
-  Plus,
   Settings
 } from 'lucide-react';
 import {
@@ -24,16 +23,18 @@ import {
 import { useSession } from 'next-auth/react';
 
 import { toast, Toaster } from 'react-hot-toast';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import EditUserDialog from '@/components/edituserDialog';
 import UserDetailsModal from '@/components/userdetailModal';
 import { useRouter } from 'next/navigation';
 import SimpleSpinner from '@/components/Loadingspinner';
-import Link from 'next/link';
 import ModelStatsModal from '@/components/EditModelstats';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
 
 const LoadingHeader = () => (
   <div className="mb-10">
@@ -166,7 +167,7 @@ export default function Admin() {
 
 
 
-  const deleteUser = async (userid: Number) => {
+  const deleteUser = async (userid: number) => {
     try {
       const response = await fetch("/api/DeleteUser", {
         method: "DELETE",
@@ -188,20 +189,15 @@ export default function Admin() {
         toast.error(`Cannot Delete User ${data.user.name} , Something went wrong`)
       }
 
-    } catch (error) {
-
+    } catch{
+        toast.error("Error deleting user")
     }
   }
 
 
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const [isEditmodelOpen, setisEditmodelOpen] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, [isEditOpen]);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -372,8 +368,9 @@ export default function Admin() {
                   </tbody>
 
                   {selectedUserForEdit !== null && (
+                    
                     <EditUserDialog
-                      user={users.find((user: any) => user.id === selectedUserForEdit)}
+                      user={users.find((user: any) => user.id === selectedUserForEdit) || ({} as User)}
                       isOpen={selectedUserForEdit !== null}
                       setIsOpen={() => setSelectedUserForEdit(null)}
                     />

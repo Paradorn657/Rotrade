@@ -1,8 +1,7 @@
-import { getServerSession, NextAuthOptions } from "next-auth"
+import { getServerSession, NextAuthOptions, Session} from "next-auth"
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { compare } from "bcrypt";
 import { JWT } from "next-auth/jwt";
 
@@ -94,21 +93,21 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
 
-    async session({ session, token }: { session: any; token: JWT }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        session.user.id = token.id || null; // ดึง id จาก token
-        session.user.name = token.username;
-        session.user.email = token.email;
-        session.user.role = token.role;
-        session.user.provider = token.provider;
-        session.user.createDate = token.createdDate
+        session.user.id = (token.id as string) || null; // ดึง id จาก token
+        session.user.name = token.username as string;
+        session.user.email = token.email ?? '';
+        session.user.role = token.role as string;
+        session.user.provider = token.provider as string;
+        session.user.createDate = token.createdDate as Date;
       }
       return session;
     },
 
     async signIn({ profile }) {
       if (profile?.email) {
-        const user = await prisma.user.upsert({
+        await prisma.user.upsert({
           where: {
             email: profile.email,
           },

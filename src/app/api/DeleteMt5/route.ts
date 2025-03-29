@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import {  NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 
 
@@ -18,6 +18,6 @@ export async function DELETE(req:Request){
         console.log("ลบ mt5",deletemt5)
         return NextResponse.json({ message: 'mt5 deleted successfully', mt5: deletemt5 });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to delete mt5' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to delete mt5'+error }, { status: 500 });
     }
 }

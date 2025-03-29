@@ -3,7 +3,7 @@ import { stripe } from "../../../../lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
 
     const body = await req.text();
     const signature = req.headers.get("Stripe-Signature") as string;
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
             signature,
             process.env.STRIPE_WEBHOOK_SECRET!);
 
-    } catch (error) {
+    } catch {
         return new NextResponse("invalid signature", { status: 400 })
     }
     if (event.type === "payment_intent.succeeded") {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
         console.log("BIll ID:", paymentIntent.metadata.billid);
 
 
-        const updatedBill = await prisma.bills.update({
+        await prisma.bills.update({
             where: {
                 Bill_id: Number(paymentIntent.metadata.billid),
                 MT5_accountid: paymentIntent.metadata.forMT5id

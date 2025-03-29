@@ -20,7 +20,7 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ message: 'User deleted successfully', user: deleteuser });
   
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to delete user'+error }, { status: 500 });
     }
     
 }

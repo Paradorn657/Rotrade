@@ -60,12 +60,12 @@ export async function POST(req: Request) {
     const maxDate = new Date(Math.max(...timestamps));
 
     let currentStart = new Date(minDate);
-    let bills = [];
+    const bills = [];
     console.log('mindate:', minDate.toISOString(), "maxDate:", maxDate.toISOString());
 
     let lastBilledDate: Date | null = null; // ตัวแปรเก็บวันที่ตัดบิลรอบสุดท้าย
     while (currentStart <= maxDate) {
-      let currentEnd = new Date(currentStart);
+      const currentEnd = new Date(currentStart);
       // เพิ่มเวลา 1 นาทีในรูปแบบ UTC
       // currentEnd.setUTCMinutes(currentEnd.getUTCMinutes() + 1);
       currentEnd.setUTCDate(currentEnd.getUTCDate() + 7);
@@ -88,13 +88,13 @@ export async function POST(req: Request) {
       if (existingBill) {
         console.log(`พบบิลซ้ำของ MT5 ${mt5AccountId} ในช่วง ${currentStart.toISOString()} - ${currentEnd.toISOString()} ไม่สร้างซ้ำ`);
       } else {
-        const filteredDeals = deals.filter(deal => {
+        const filteredDeals = deals.filter((deal: { time: number; }) => {
           // ปรับ timestamp จาก GMT+2 เป็น UTC ก่อนเปรียบเทียบ
           const dealDate = new Date((deal.time * 1000) - (2 * 60 * 60 * 1000));
           return dealDate >= currentStart && dealDate <= currentEnd;
         });
 
-        const totalProfit = filteredDeals.reduce((sum, deal) => sum + deal.profit, 0);
+        const totalProfit = filteredDeals.reduce((sum: any, deal: { profit: any; }) => sum + deal.profit, 0);
         const dealCount = filteredDeals.length;
         let BILLSHOW;
 

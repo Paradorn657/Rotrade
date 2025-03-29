@@ -1,9 +1,8 @@
 "use client"
 import { signIn } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { revalidatePath } from 'next/cache';
 
 export default function Login() {
     const router = useRouter();
@@ -39,7 +38,7 @@ export default function Login() {
     };
 
     const validateForm = (name: string, value: string, updatedFormData: { email: string; password: string; }) => {
-        let updatedErrors = { ...errors };
+        const updatedErrors = { ...errors };
 
         switch (name) {
             case 'email':
@@ -275,26 +274,6 @@ export default function Login() {
                                 )}
                             </div>
 
-                            {/* <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <div className="relative">
-                                        <input
-                                            id="remember_me"
-                                            name="remember_me"
-                                            type="checkbox"
-                                            className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-500/50 rounded bg-white/10 checked:bg-blue-600 transition-colors duration-200"
-                                        />
-                                    </div>
-                                    <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-300">
-                                        Remember me
-                                    </label>
-                                </div>
-                                <div className="text-sm">
-                                    <Link href="/forgot-password" className="text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-300">
-                                        Forgot your password?
-                                    </Link>
-                                </div>
-                            </div> */}
 
                             <button
                                 type="submit"
@@ -316,7 +295,7 @@ export default function Login() {
                         </form>
 
                         <p className="text-center text-sm text-gray-300 mt-8">
-                            Don't have an account?{' '}
+                            {`Don't have an account? `}
                             <Link href="/signup" className="text-blue-400 hover:text-blue-300 hover:underline font-medium transition-colors duration-300">
                                 Create Account
                             </Link>

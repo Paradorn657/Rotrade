@@ -1,26 +1,12 @@
 
+import { LayoutDashboard, Radio, ReceiptText, Settings, Shield, SlidersHorizontal } from "lucide-react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import Sidebar, { SidebarItem } from '../app/sidebar';
+import SessionWrapper from "../components/SessionWrapper";
 import "./globals.css";
 import Navbar from "./Navbar";
-import SessionWrapper from "../components/SessionWrapper";
-import Foot from "../components/footter";
-import Sidebar, { SidebarItem } from '../app/sidebar'
-import { Radio,History ,Settings, LayoutDashboard,SlidersHorizontal ,ReceiptText, Shield, Users } from "lucide-react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../lib/authOptions";
-import { useSession } from "next-auth/react";
 
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -30,7 +16,6 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) 
 {
-  const session = await getServerSession(authOptions);
   return (
     <SessionWrapper>
       <html lang="en">
@@ -47,7 +32,7 @@ export default async function RootLayout({children,}: Readonly<{children: React.
                 <SidebarItem icon={<ReceiptText/>} href="/Bills" text="Bills" />
                 <SidebarItem icon={<Shield />} href="/admin_manager" text="Admin"  forRole="admin"/>
                 <hr className="my-3" />
-                <SidebarItem icon={<Settings />} href="/settings"text="Settings"  />
+                <SidebarItem icon={<Settings />} href="/profile"text="Settings"  />
               </Sidebar>
 
               <div className="flex-1 overflow-y-auto">

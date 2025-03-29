@@ -1,27 +1,30 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
 
-import { Clock, Users, Bot, BarChart2, TrendingUp, Pointer } from 'lucide-react';
+import SimpleSpinner from '@/components/Loadingspinner';
+import LoginRedirect from '@/components/loginredirect';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Bot, Clock, Pointer, Users } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import LoginRedirect from '@/components/loginredirect';
-import SimpleSpinner from '@/components/Loadingspinner';
 
-interface Bot {
+interface IBot {
   Model_id: number;
   name: string;
   version: string;
   Update_at: string;
   numberofuse: number;
+  winrate: number;
+  balance_drawdown: number;
+  equity_drawdown: number;
 }
 
 
 
 const BotPresets = () => {
-  const [bots, setBots] = useState([]);
-  const [filteredBots, setFilteredBots] = useState<any>([]);
+  const [bots, setBots] = useState<IBot[]>([]);
+  const [filteredBots, setFilteredBots] = useState<IBot[]>([]);
   const [botNames, setBotNames] = useState<any>([]);
   const [selectedBot, setSelectedBot] = useState("All");
   const [showModal, setShowModal] = useState(false);
@@ -36,7 +39,7 @@ const BotPresets = () => {
       console.log(data);
       setBots(data);
       setFilteredBots(data);
-      const names = Array.from(new Set(data.map(bot => bot.name)));
+      const names = Array.from(new Set(data.map((bot: { name: any; }) => bot.name)));
       setBotNames(names);
     };
     fetchBots();
@@ -115,7 +118,7 @@ const BotPresets = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
         <Toaster position="top-center" />
 
-        <div className="max-w-7xl mx-auto p-2 ">
+        <div className="max-w-7xl mx-auto p-1 ">
           <div className="space-y-2 mb-12 mt-9">
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800">
               Signal Forex Robot
@@ -131,7 +134,7 @@ const BotPresets = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All">All Bots</SelectItem>
-                  {botNames.map((name, index) => (
+                  {botNames.map((name:any, index:any) => (
                     <SelectItem key={index} value={name}>{name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -139,87 +142,113 @@ const BotPresets = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredBots.map((bot, index) => (
-              <div
-                key={index}
-                className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden 
-      transition-all duration-300 hover:shadow-xl hover:border-blue-100 
-      flex flex-col max-w-xl transform hover:-translate-y-2"
-              >
-                <div className="p-6 space-y-4 flex-grow flex flex-col">
-                  {/* Header */}
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center space-x-3">
-                      <Bot className="w-6 h-6 text-blue-500 opacity-70" />
-                      <h2 className="text-xl font-bold text-gray-900">{bot.name}</h2>
-                    </div>
-                    <div className="text-xs text-gray-700 bg-yellow-200 px-2 py-1 rounded-full">
-                      v{bot.version}
-                    </div>
-                  </div>
-
-                  {/* Stats Section */}
-                  <p className="text-xs font-semibold tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md uppercase border-b-2 border-blue-200 inline-block w-fit">
-                    Backtest Result
-                  </p>
-                  <div className="grid grid-cols-3  bg-gray-50 p-4 rounded-lg">
-                    <div className="text-center">
-                      <div className="text-xs uppercase text-gray-500 mb-1">Winrate</div>
-                      <div className="text-xl font-bold text-blue-600">
-                        {bot.winrate ? `${bot.winrate}%` : "-"}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs uppercase text-gray-500 mb-1">Balance DD</div>
-                      <div className="text-xl font-bold text-green-600">
-                        {bot.balance_drawdown}%
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs uppercase text-gray-500 mb-1">Equity DD</div>
-                      <div className="text-xl font-bold text-red-600">
-                        {bot.equity_drawdown}%
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Extended Details */}
-                  <div className="space-y-3 text-sm text-gray-600 mb-4">
+          <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBots.map((bot, index) => (
+                <div
+                  key={index}
+                  className="bg-white border border-gray-200 rounded-2xl shadow-md overflow-hidden 
+          transition-all duration-300 hover:shadow-xl hover:border-blue-300 
+          flex flex-col h-full transform hover:-translate-y-1"
+                >
+                  {/* Bot Header with Gradient */}
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-4 text-white">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>Timeframe</span>
+                      <div className="flex items-center space-x-3">
+                        <Bot className="w-6 h-6 text-white" />
+                        <h2 className="text-xl font-bold">{bot.name}</h2>
                       </div>
-                      <span className="font-medium text-gray-900">
-                        {bot.name.split(" ")[1] || 'N/A'}
+                      <div className="bg-white text-indigo-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                        v{bot.version}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 space-y-4 flex-grow flex flex-col">
+                    {/* Update Information */}
+                    <div className="flex justify-between items-center text-xs text-gray-500 mb-2">
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-1" />
+                        <span>อัพเดทล่าสุด:</span>
+                      </div>
+                      <span className="font-medium">
+                        {new Date(bot.Update_at).toLocaleString('th-TH', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false
+                        })}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <Users className="w-4 h-4 text-gray-400" />
-                        <span>Users</span>
-                      </div>
-                      <span className="font-medium text-gray-900">
-                        {bot.numberofuse}
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Action Button */}
-                  <button
-                    onClick={() => handleCopyBot(bot)}
-                    className="mt-auto w-full py-3 rounded-lg bg-blue-500 text-white font-semibold 
-          hover:bg-blue-600 transition-all duration-300 
-          flex items-center justify-center space-x-2 
-          transform hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <Pointer className="w-5 h-5 mr-2" />
-                    <span>Use bot</span>
-                  </button>
+                    {/* Backtest Banner */}
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-md">
+                      <p className="text-sm font-medium text-blue-700">
+                        ผลการ Backtest (1 ปี)
+                      </p>
+                    </div>
+
+                    {/* Stats Section with Improved Design */}
+                    <div className="grid grid-cols-3 gap-2 my-3">
+                      <div className="bg-gray-50 p-3 rounded-lg text-center border border-gray-100">
+                        <div className="text-xs uppercase text-gray-500 mb-1">Winrate</div>
+                        <div className="text-xl font-bold text-blue-600">
+                          {bot?.winrate? `${bot.winrate}%` : "-"}
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg text-center border border-gray-100">
+                        <div className="text-xs uppercase text-gray-500 mb-1">Balance DD</div>
+                        <div className="text-xl font-bold text-green-600">
+                          {bot.balance_drawdown}%
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg text-center border border-gray-100">
+                        <div className="text-xs uppercase text-gray-500 mb-1">Equity DD</div>
+                        <div className="text-xl font-bold text-red-600">
+                          {bot.equity_drawdown}%
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Details */}
+                    <div className="space-y-3 text-sm border-t border-gray-100 pt-3 pb-2">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-4 h-4 text-blue-400" />
+                          <span className="text-gray-600">Timeframe</span>
+                        </div>
+                        <span className="font-medium text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
+                          {bot.name.split(" ")[1] || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <Users className="w-4 h-4 text-blue-400" />
+                          <span className="text-gray-600">จำนวนผู้ใช้</span>
+                        </div>
+                        <span className="font-medium text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
+                          {bot.numberofuse}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <button
+                      onClick={() => handleCopyBot(bot)}
+                      className="mt-4 w-full py-3 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold 
+              hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 
+              flex items-center justify-center 
+              transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+                    >
+                      <Pointer className="w-5 h-5 mr-2" />
+                      <span>เลือกใช้ Bot นี้</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
 

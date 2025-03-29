@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
 
 
-import { toast, Toaster } from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import { toast } from 'react-hot-toast';
 
-const EditUserDialog = ({ user, isOpen, setIsOpen}) => {
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
+interface EditUserDialogProps {
+  user: User;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+const EditUserDialog: React.FC<EditUserDialogProps> = ({ user, isOpen, setIsOpen }) => {
   const [formData, setFormData] = useState({
     name: user.name,
     email: user.email,
@@ -16,7 +29,7 @@ const EditUserDialog = ({ user, isOpen, setIsOpen}) => {
 
   const userId = user.id;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     console.log("userid", user.id)
     console.log("userdata", formData)
@@ -83,9 +96,9 @@ const EditUserDialog = ({ user, isOpen, setIsOpen}) => {
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="USER">User</SelectItem>
-                <SelectItem value="ADMIN">Admin</SelectItem>
-                <SelectItem value="BAN">Banned</SelectItem>
+                <SelectItem value="user">user</SelectItem>
+                <SelectItem value="admin">admin</SelectItem>
+                <SelectItem value="BAN">ban</SelectItem>
               </SelectContent>
             </Select>
           </div>

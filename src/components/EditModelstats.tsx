@@ -1,11 +1,10 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import toast, { Toaster } from 'react-hot-toast';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const ModelStatsModal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (open: boolean) => void }) => {
   const [models, setModels] = useState<{
@@ -34,7 +33,7 @@ const ModelStatsModal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (o
         const data = await response.json();
         setModels(data);
       } catch (error) {
-        toast.error('Could not fetch models');
+        toast.error('Could not fetch models'+error);
       }
     };
 
@@ -103,7 +102,7 @@ const ModelStatsModal = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (o
       });
       setSelectedModel(null);
     } catch (error) {
-      toast.error('Could not update model stats');
+      toast.error('Could not update model stats'+error);
     }
   };
 

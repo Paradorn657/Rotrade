@@ -47,6 +47,7 @@ model Model{
   Update_at DateTime     @default(now())
   numberofuse Int @default(0)
   mt5Accounts mt5Account[] // เชื่อมกลับมาหา mt5Account
+  
   winrate Float?
   balance_drawdown Float?
   equity_drawdown Float?

@@ -1,17 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
-import { authSession } from '../../../../lib/authOptions';
-prisma
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-
-    let models;
 
     
-    models = await prisma.model.findMany();
+    const models = await prisma.model.findMany();
     
 
     return NextResponse.json(models, { status: 200 });

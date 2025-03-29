@@ -1,26 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { 
-  CheckCircle, 
-  XCircle, 
-  Bot, 
-  RotateCw,
-  AlertTriangle,
-  Search,
-  PlusCircle
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import LoginRedirect from "@/components/loginredirect";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  AlertTriangle,
+  Bot,
+  CheckCircle,
+  PlusCircle,
+  RotateCw,
+  Search,
+  XCircle
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
-import { version } from "os";
 
 export default function ControlPanel() {
     const router = useRouter();  
@@ -37,7 +36,7 @@ export default function ControlPanel() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { status, data: session } = useSession();
+  const { data: session } = useSession();
 
   const fetchRobots = () => {
     if (session?.user?.id) {
@@ -45,7 +44,7 @@ export default function ControlPanel() {
       fetch(`/api/getcontrolbot?user_id=${session.user.id}`)
         .then((response) => response.json())
         .then((data) => {
-          setRobotStatus(data.map((account) => ({
+          setRobotStatus(data.map((account:any) => ({
             id: account.MT5_id,
             name: account.model.name,
             version: account.model.version,

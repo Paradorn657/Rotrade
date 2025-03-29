@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -22,7 +22,7 @@ export default function PaymentSuccess() {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-2xl font-bold">{message}</h1>
-      <a href="/" className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">กลับสู่หน้าแรก</a>
+      <Link href="/" className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">กลับสู่หน้าแรก</Link>
     </div>
   );
 }

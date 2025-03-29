@@ -1,23 +1,55 @@
 'use client';
 
-import { getServerSession } from 'next-auth';
+import Foot from '@/components/footter';
+import TradingViewTicker from '@/components/tradingViewticker';
+import { BarChart2, Clock, DollarSign, Lock, Zap } from 'lucide-react';
 import { signIn, useSession } from 'next-auth/react';
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
-import { authOptions } from '../../lib/authOptions';
-import Foot from '@/components/footter';
-import { ArrowRight, BarChart2, Lock, Zap, DollarSign, Clock } from 'lucide-react';
-import TradingViewTicker from '@/components/tradingViewticker';
+import { useEffect, useState } from 'react';
 
-import { TradingViewEURUSDMiniChart, TradingViewUSDJPYMiniChart } from '@/components/tradingViewXAUmini';
+import { TradingViewEURUSDMiniChart, TradingViewGBPUSDMiniChart, TradingViewUSDJPYMiniChart } from '@/components/tradingViewXAUmini';
 
 
-export default function Home() {
+export default  function Home() {
   // Client-side session handling
   const { data: session } = useSession();
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const [best3model, setBest3model] = useState<{ pair: string; bestModel: any }[]>([]);
+
+  async function fetchallmodel() {
+    const response = await fetch("/api/get-model", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    const data = await response.json();
+    const groupedData = data.reduce((acc: { [x: string]: any[]; }, item: { name: string; }) => {
+      const pair = item.name.split(' ')[0]; // Extract the currency pair from the name
+      if (!acc[pair]) {
+        acc[pair] = [];
+      }
+      acc[pair].push(item);
+      return acc;
+    }, {});
+    
+    // Find the model with the highest winrate for each pair
+    const bestModels = Object.keys(groupedData).map(pair => {
+      const bestModel = groupedData[pair].reduce((max: { winrate: number; }, item: { winrate: number; }) => (item.winrate > max.winrate ? item : max), groupedData[pair][0]);
+      return {
+        pair,
+        bestModel
+      };
+    });
+    const pairOrder = ["USDJPY", "EURUSD", "GBPUSD"];
+    const sortedBestModels = bestModels.sort((a, b) => pairOrder.indexOf(a.pair) - pairOrder.indexOf(b.pair));
+    setBest3model(sortedBestModels);
+    console.log("data", sortedBestModels);
+  }
+  
   useEffect(() => {
+    fetchallmodel();
     setIsLoaded(true);
   }, []);
 
@@ -42,7 +74,7 @@ export default function Home() {
             <div>
               {isLoaded && session ? (
                 <div className="flex items-center space-x-3">
-                  <a href="/dashboard" className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition">Dashboard</a>
+                  <a href="/Dashboard" className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition">Dashboard</a>
                 </div>
               ) : (
                 <button
@@ -62,9 +94,9 @@ export default function Home() {
             <div>
               {isLoaded && session ? (
                 <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                  Hello, <span className="text-green-400">ภราดร จันทร์เจริญ</span>
+                  Hello, <span className="text-green-400">{session.user.name}</span>
                 </h2>
-              ) : null}
+              ) : <div className="h-12 w-48 bg-gray-700 animate-pulse rounded-md mb-6"></div>}
               <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
                 Automate Your <span className="text-green-400">Forex Trading</span> With Powerful AI
               </h1>
@@ -86,13 +118,36 @@ export default function Home() {
                 </a>
               </div>
             </div>
-            <div className="space-y-4">
-              <h1 className="text-white text-2xl font-bold mb-4">Market Prices</h1>
-              <TradingViewTicker />
-              <h1 className="text-white text-2xl font-bold mb-4">Gold Price Chart</h1>
-              <TradingViewEURUSDMiniChart />
-              <TradingViewUSDJPYMiniChart />
+
+            <div className="space-y-5">
+              <div>
+                <h1 className="text-white text-2xl font-bold ">Market Prices</h1>
+                <div className="relative h-16 overflow-hidden">
+                  <TradingViewTicker />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-white text-2xl font-bold ">GBP/USD Chart</h1>
+                <div className="relative h-56 overflow-hidden">
+                  <TradingViewGBPUSDMiniChart/>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-white text-2xl font-bold">EUR/USD Chart</h1>
+                <div className="relative h-56 overflow-hidden">
+                  <TradingViewEURUSDMiniChart />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-white text-2xl font-bold">USD/JPY Chart</h1>
+                <div className="relative h-56 overflow-hidden">
+                  <TradingViewUSDJPYMiniChart />
+                </div>
+              </div>
             </div>
+
+
+
           </div>
         </div>
 
@@ -104,16 +159,16 @@ export default function Home() {
               <p className="text-gray-300 mt-1">Automated Trading</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">95+</p>
-              <p className="text-gray-300 mt-1">Trading Models</p>
+              <p className="text-3xl font-bold text-white">3 Popular</p>
+              <p className="text-gray-300 mt-1">Trading forex Models</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">5,000+</p>
-              <p className="text-gray-300 mt-1">Active Users</p>
+              <p className="text-3xl font-bold text-white">Newly updated</p>
+              <p className="text-gray-300 mt-1">models</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">24%</p>
-              <p className="text-gray-300 mt-1">Avg. Annual Return</p>
+              <p className="text-3xl font-bold text-white">Low Risk</p>
+              <p className="text-gray-300 mt-1">High Winrate</p>
             </div>
           </div>
         </div>
@@ -132,9 +187,9 @@ export default function Home() {
               <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
                 <Zap size={24} className="text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Advanced Algorithms</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Optimized</h3>
               <p className="text-gray-300">
-                Access cutting-edge trading algorithms developed by professional quants and data scientists.
+                We use 5-15 years of historical data to train our Reinforcement models, ensuring they are optimized for current market conditions.
               </p>
             </div>
 
@@ -144,7 +199,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">Secure & Reliable</h3>
               <p className="text-gray-300">
-                Our platform uses enterprise-grade security protocols to keep your investments safe at all times.
+                Our platform do not need personal information, to keep your investments safe at all times.
               </p>
             </div>
 
@@ -154,7 +209,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">Cost Effective</h3>
               <p className="text-gray-300">
-                Rent models for a fraction of the cost of developing your own trading systems and algorithms.
+                You pay only 10% of the profit you make. There are no hidden fees or commissions.
+                And if there is no profit, we don't charge any money.
               </p>
             </div>
 
@@ -172,9 +228,9 @@ export default function Home() {
               <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
                 <BarChart2 size={24} className="text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Performance Tracking</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Low risk</h3>
               <p className="text-gray-300">
-                Track the performance of your trading models with detailed analytics and reports.
+                our models are designed to minimize risk while maximizing profit potential.
               </p>
             </div>
 
@@ -184,7 +240,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">Easy Integration</h3>
               <p className="text-gray-300">
-                Seamlessly connect our models to your existing trading accounts and platforms.
+                Easy to connect Metatrader 5 accounts with our platform.
               </p>
             </div>
           </div>
@@ -200,23 +256,24 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
+            
+
             <div className="bg-blue-800/30 backdrop-blur-sm p-8 rounded-xl border border-blue-700/50 relative">
               <div className="absolute -top-4 -left-4 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
                 1
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3 pt-6">Choose Your Model</h3>
+              <h3 className="text-xl font-semibold text-white mb-3 pt-6">Connect Your Account</h3>
               <p className="text-gray-300">
-                Browse our marketplace of professional trading models and select the one that matches your strategy and risk profile.
+                Add Metatrader account using our secure API. No personal information is required.
               </p>
             </div>
-
             <div className="bg-blue-800/30 backdrop-blur-sm p-8 rounded-xl border border-blue-700/50 relative">
               <div className="absolute -top-4 -left-4 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
                 2
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3 pt-6">Connect Your Account</h3>
+              <h3 className="text-xl font-semibold text-white mb-3 pt-6">Choose Your Model</h3>
               <p className="text-gray-300">
-                Securely link your brokerage account to our platform using our simple integration process.
+                Choose your Robot/Forex Pair that you Want to trade
               </p>
             </div>
 
@@ -226,7 +283,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-3 pt-6">Start Trading</h3>
               <p className="text-gray-300">
-                Activate your model and watch as it automatically analyzes the market and executes trades on your behalf.
+                Put Expert Advisor to work and start making profits.
               </p>
             </div>
           </div>
@@ -244,12 +301,12 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-blue-800/30 backdrop-blur-sm p-8 rounded-xl border border-blue-700/50">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-white">XAUUSD Trader</h3>
-                <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm">Gold</span>
+                <h3 className="text-xl font-semibold text-white">GBPUSD Trader</h3>
+                <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm">Scalping</span>
               </div>
               <div className="space-y-4">
                 <p className="text-gray-300">
-                  Specialized gold trading model optimized for 15-minute timeframes with advanced price action analysis.
+                GBP/USD trading bot is designed for short-term trades on a 15-minute timeframe. use Robot to identify key market patterns and trends combine with Portfolio data, 
                 </p>
                 <div className="pt-4 border-t border-blue-700">
                   <div className="flex justify-between text-sm">
@@ -258,11 +315,11 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between text-sm mt-2">
                     <span className="text-gray-400">Win Rate</span>
-                    <span className="text-green-400">68.5%</span>
+                    <span className="text-green-400">{best3model[0]?.bestModel.winrate ?? "-"}%</span>
                   </div>
                   <div className="flex justify-between text-sm mt-2">
-                    <span className="text-gray-400">Monthly Return</span>
-                    <span className="text-green-400">+8.2%</span>
+                    <span className="text-gray-400">Balance Drawdown</span>
+                    <span className="text-green-400">{best3model[1]?.bestModel.balance_drawdown ?? "-"}%</span>
                   </div>
                 </div>
                 <a href="/models/xauusd" className="mt-6 block w-full py-3 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
@@ -278,7 +335,7 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 <p className="text-gray-300">
-                  Trend-following model for the most liquid forex pair, with advanced indicator analysis on 1-hour charts.
+                  Trend-following model for the most liquid forex pair, with advanced indicator analysis on 1-hour charts combine with Portfolio data to maximize your profit with lowest risk.
                 </p>
                 <div className="pt-4 border-t border-blue-700">
                   <div className="flex justify-between text-sm">
@@ -287,11 +344,11 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between text-sm mt-2">
                     <span className="text-gray-400">Win Rate</span>
-                    <span className="text-green-400">72.3%</span>
+                    <span className="text-green-400">{best3model[1]?.bestModel.winrate ?? "-"}%</span>
                   </div>
                   <div className="flex justify-between text-sm mt-2">
-                    <span className="text-gray-400">Monthly Return</span>
-                    <span className="text-green-400">+6.8%</span>
+                    <span className="text-gray-400">Balance Drawdown</span>
+                    <span className="text-green-400">{best3model[1]?.bestModel.balance_drawdown ?? "-"}%</span>
                   </div>
                 </div>
                 <a href="/models/eurusd" className="mt-6 block w-full py-3 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
@@ -307,7 +364,7 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 <p className="text-gray-300">
-                  Medium-term swing trading model specialized for USD/JPY pairs with volatility-based entry and exit rules.
+                  Medium-term swing trading model specialized for USD/JPY pairs with volatility-based entry + solid indicator and exit rules combine with Portfolio data.
                 </p>
                 <div className="pt-4 border-t border-blue-700">
                   <div className="flex justify-between text-sm">
@@ -316,11 +373,11 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between text-sm mt-2">
                     <span className="text-gray-400">Win Rate</span>
-                    <span className="text-green-400">64.1%</span>
+                    <span className="text-green-400">{best3model[0]?.bestModel.winrate ?? "-"}%</span>
                   </div>
                   <div className="flex justify-between text-sm mt-2">
-                    <span className="text-gray-400">Monthly Return</span>
-                    <span className="text-green-400">+7.5%</span>
+                    <span className="text-gray-400">Balance Drawdown</span>
+                    <span className="text-green-400">{best3model[0]?.bestModel.balance_drawdown ?? "-"}%</span>
                   </div>
                 </div>
                 <a href="/models/usdjpy" className="mt-6 block w-full py-3 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
@@ -338,7 +395,7 @@ export default function Home() {
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold text-white">Ready to Start Automated Trading?</h2>
                 <p className="mt-4 text-lg text-white/90">
-                  Join thousands of traders who are already using RoTrade to maximize their forex trading profits.
+                  Join traders who are already using RoTrade to maximize their forex trading profits with lower risk.
                 </p>
                 <div className="mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                   <a
@@ -347,19 +404,14 @@ export default function Home() {
                   >
                     Get Started Now
                   </a>
-                  <a
-                    href="/demo"
-                    className="px-8 py-4 text-center bg-transparent border-2 border-white text-white rounded-lg font-medium hover:bg-white/10 transition"
-                  >
-                    Request Demo
-                  </a>
+                 
                 </div>
               </div>
               <div className="hidden md:block text-right">
                 <div className="inline-block bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
-                  <p className="text-5xl font-bold text-white">24%</p>
-                  <p className="text-xl text-white mt-2">Average Annual Return</p>
-                  <p className="text-white/70 text-sm mt-2">Based on our top 10 models</p>
+                  <p className="text-5xl font-bold text-white">{(best3model[0]?.bestModel.winrate +best3model[1]?.bestModel.winrate +best3model[2]?.bestModel.winrate )/3}%</p>
+                  <p className="text-xl text-white mt-2">Average Winrate</p>
+                  <p className="text-white/70 text-sm mt-2">Based on our top 3 models</p>
                 </div>
               </div>
             </div>

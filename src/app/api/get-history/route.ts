@@ -1,11 +1,8 @@
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions, authSession } from "../../../../lib/authOptions";
-import { getSession } from "next-auth/react";
 import { prisma } from "../../../../lib/prisma";
 
 let tradeHistory: any[] = []; //{token,history} 
-let createBillData: any; 
+
 
 export async function POST(req: NextRequest) {
     
@@ -38,7 +35,7 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify({ userId: user?.user_id }),
         });
 
-        createBillData = await createBillResponse.json();
+        await createBillResponse.json();
         console.log("🧾 Bill Created:");
 
 

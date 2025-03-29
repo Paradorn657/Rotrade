@@ -3,13 +3,13 @@ import NextAuth from "next-auth";
 declare module "next-auth" {
   interface Session {
     user: {
-      id: string;
+      id: string | null; // Allow null here
       email: string;
       name?: string;
-      role:string
-      image:string
-      provider:string
-      createDate:DateTime
+      role: string;
+      image: string;
+      provider: string;
+      createDate: Date; // Assuming this is Date, adjust if needed
     };
   }
 

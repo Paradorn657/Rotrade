@@ -1,18 +1,17 @@
 "use client";
-import { Save ,Pocket} from 'lucide-react';
-import { getSession, useSession } from 'next-auth/react';
+import { error } from 'console';
+import { Pocket, Save } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { MouseEvent, useEffect, useState } from 'react';
 
 import { toast, Toaster } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
 
 
 export default function Profile() {
-    const router = useRouter();
-    const { data: session ,status, update} = useSession()
+    const { data: session,status ,update} = useSession()
     const isGoogleLogin = session?.user.provider === "google";
 
-    const [username, setUsername] = useState(session?.user.name);
+    const [username, setUsername] = useState(status == "loading" ? "loading" :session?.user.name);
 
     useEffect(() => {
         if (session?.user?.name) {
@@ -27,10 +26,6 @@ export default function Profile() {
 
     console.log("isGoogleLogin", isGoogleLogin)
 
-    const reloadSession = () => {
-        const event = new Event("visibilitychange");
-        document.dispatchEvent(event);
-      };
 
     const handleSave = async (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) =>{
         e.preventDefault();
@@ -48,10 +43,9 @@ export default function Profile() {
                 body:JSON.stringify({
                     userId:session?.user.id,
                     newUsername:username,
-                    newPassword:""
                 })
             })
-            const data = await response.json();
+            await response.json();
             if (response.ok) {
                 toast.success("Updated Information !", { duration: 3000 });
                 // toast.success("You need to rel!", { duration: 5000 });
@@ -70,6 +64,44 @@ export default function Profile() {
         
     }
 
+    const handleChangePassword = async (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) =>{
+        e.preventDefault();
+        if(newPassword != confirmPassword){ //ไม่ได้เปลี่ยน
+            toast.error("Confirm Password Not Match!", { duration: 5000 });
+        }
+        else{
+            try{
+            const response = await fetch('/api/updateuser',{
+                method:'PATCH',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify({
+                    userId:session?.user.id,
+                    newPassword:newPassword,
+                    password:currentPassword,
+                })
+            })
+            const data = await response.json();
+            if (response.ok) {
+                toast.success("Updated Password !", { duration: 3000 });
+                await update();
+            }   
+            else if(data.error){
+                toast.error(data.error, { duration: 5000 });
+            }
+        }
+        catch(error){
+            console.error(error);
+            toast.error("Error updating user Password information!", { duration: 5000 });
+
+        }
+        }
+        
+    }
+
+ 
+
     return (
         <section className="bg-white dark:bg-gray-900">
             <Toaster position="top-center" reverseOrder={true} />
@@ -77,7 +109,7 @@ export default function Profile() {
                 <h2 className={`mb-4 text-xl font-bold ${session?.user.role === 'user' ? 'text-blue-500' : 'text-green-500'} dark:text-white`}>
                     Personal Information {session?.user.role === 'user' ? '(User)' : '(Admin)'}
                 </h2>
-                <form action="#">
+                <form>
                     <div className="grid gap-4 mb-4 sm:grid-cols-2 sm:gap-6 sm:mb-5">
 
                         {/* Email (Read-Only) */}
@@ -89,7 +121,7 @@ export default function Profile() {
                                 name="email"
                                 id="email"
                                 className="bg-gray-50 border border-gray-300 text-gray-300 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                value={session?.user.email || "loading..."}
+                                value={status === "loading" ? "loading" : session?.user.email}
                                 readOnly
                             />
                         </div>
@@ -102,7 +134,7 @@ export default function Profile() {
                                 name="username"
                                 id="username"
                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                value={username || "loading..."}
+                                value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="Username"
                             />
@@ -193,7 +225,7 @@ export default function Profile() {
                     {/* Save Button */}
                     {!isGoogleLogin && (
                     <div className="flex items-center space-x-4 mt-6">
-                        <button type="submit" className="h-10 flex items-center text-white bg-blue-700 hover:bg-blue-400 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5">
+                        <button onClick={handleChangePassword} className="h-10 flex items-center text-white bg-blue-700 hover:bg-blue-400 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5">
                             <Pocket />
                             <span className="ml-2">Change</span>
                         </button>
