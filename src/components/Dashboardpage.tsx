@@ -16,8 +16,10 @@ import { Bills } from "@prisma/client";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js/auto';
 import { randomBytes } from "crypto";
 import { Clipboard } from "flowbite-react";
-import { AlertTriangle, Award, BarChart2, Clock, Percent, RefreshCcw, Sparkles, Trash2, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Award, BarChart2, Clock, Download, ExternalLink, Info, Percent, RefreshCcw, Sparkles, Trash2, TrendingUp } from 'lucide-react';
 import { Session } from "next-auth";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Doughnut } from 'react-chartjs-2';
 import toast, { Toaster } from "react-hot-toast";
@@ -26,7 +28,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 
 export function Component({ api_token }: { api_token: string }) {
-  
+
   const displayedToken = api_token.length > 10 ? api_token.slice(0, 10) + " ************" : api_token;
   return (
     <div className="grid w-52 max-w-64">
@@ -49,6 +51,7 @@ export function Component({ api_token }: { api_token: string }) {
 }
 
 const MT5Dashboard = ({ session }: { session: Session }) => {
+  const router = useRouter();
 
   const [token, setToken] = useState("");
   const [mt5Id, setMt5Id] = useState("");
@@ -479,64 +482,109 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
               <RefreshCcw onClick={fetchAccounts} className="mr-7" />
             </button>
             <Sheet>
-              <SheetTrigger asChild>
+            <SheetTrigger asChild>
                 <Button variant="outline" >Add MT5 Account</Button>
               </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Connect Metatrader Account</SheetTitle>
+
+              <SheetContent className="sm:max-w-md">
+                <SheetHeader className="pb-4">
+                  <SheetTitle className="text-xl font-bold">Connect Metatrader Account</SheetTitle>
                   <SheetDescription>
                     Enter your MT5 details to generate a token.
                   </SheetDescription>
                 </SheetHeader>
 
-                <Button onClick={() => window.open(downloadLink , "_blank")}>
-                  Download API
-                </Button>
-                <div className="grid gap-4 py-4">
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 rounded">
+                  <p className="text-sm text-blue-700">
+                    To connect MT5 account you need to add library to your Metatrader5. This library only uses for communication.
+                    <br />
+                    <u><Link href={"/Document"}>Please read Documentation about how to connect.</Link></u>
+                  </p>
+                </div>
+
+                <div className="flex gap-3 mb-6">
+                  <Button
+                    variant="secondary"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(downloadLink, "_blank")}
+                  >
+                    <Download className="h-4 w-4" />
+                    Download API
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => router.push("/Document")}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Read Documentation
+                  </Button>
+                </div>
+
+                <div className="space-y-5 py-3">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="mt5Id" className="text-left">MT5 ID</Label>
+                    <Label htmlFor="mt5Id" className="text-left font-medium">MT5 ID</Label>
                     <Input
                       id="mt5Id"
                       value={mt5Id}
                       onChange={(e) => setMt5Id(e.target.value)}
                       className="col-span-3"
+                      placeholder="Enter your MT5 ID"
                       required
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="mt5Name" className="text-left">MT5 Name</Label>
+                    <Label htmlFor="mt5Name" className="text-left font-medium">MT5 Name</Label>
                     <Input
                       id="mt5Name"
                       value={mt5Name}
                       onChange={(e) => setMt5Name(e.target.value)}
                       className="col-span-3"
+                      placeholder="Enter your MT5 name"
                       required
                     />
                   </div>
-                  <p className="text-sm text-gray-700">
-                    Token will be generated for: <b>{session.user.email}</b>
-                  </p>
-                  <Button onClick={handleGenerateToken}>Generate Token</Button>
+
+                  <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                    <p className="text-sm text-gray-700">
+                      Token will be generated for: <span className="font-semibold">{session.user.email}</span>
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerateToken}
+                    className="w-full"
+                    disabled={!mt5Id || !mt5Name}
+                  >
+                    Generate Token
+                  </Button>
                 </div>
 
                 {token && (
-                  <>
-                    <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
+                  <div className="mt-6">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-md mb-4">
                       <h3 className="text-sm font-semibold text-gray-800 mb-2">Generated Token:</h3>
-                      <p className="text-xs break-words"><b>Token:</b> {token}</p>
+                      <div className="bg-white p-3 rounded border border-gray-200">
+                        <p className="text-xs break-all font-mono">
+                          {token}
+                        </p>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Save this token securely. You'll need it to connect your MT5 account.
+                      </p>
                     </div>
                     <SheetFooter>
                       <SheetClose asChild>
                         <Button
-                          className="mt-7"
+                          className="w-full"
                           onClick={handleCreate}
                         >
-                          Create
+                          Create Connection
                         </Button>
                       </SheetClose>
                     </SheetFooter>
-                  </>
+                  </div>
                 )}
               </SheetContent>
             </Sheet>
