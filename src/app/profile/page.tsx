@@ -1,5 +1,4 @@
 "use client";
-import { error } from 'console';
 import { Pocket, Save } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { MouseEvent, useEffect, useState } from 'react';

@@ -1,7 +1,10 @@
-import React from 'react';
-import { ChevronRight, Book, Code, Terminal, Download, ArrowLeft, ExternalLink, Copy } from 'lucide-react';
+"use client";
+import { ArrowLeft, Book, ChevronRight, Download, ExternalLink, Terminal } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const MT5Documentation = () => {
+  const downloadLink = "https://drive.google.com/uc?export=download&id=16iSk1ocePMMmAD8jopkIQcdRScUQ_4XH";
   return (
     <div className="max-w-7xl mx-auto p-4">
       {/* Header */}
@@ -17,14 +20,17 @@ const MT5Documentation = () => {
           Complete guide to integrating and using the MT5 API with your account
         </p>
         <div className="flex flex-wrap gap-3">
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-            <Download className="h-4 w-4" />
+          <button onClick={() => window.open(downloadLink, "_blank")} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+            <Download className="h-4 w-4"  />
             Download API
           </button>
+
+          <Link href={"/Dashboard"}>
           <button className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors">
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink className="h-4 w-4"/>
             MT5 Website
           </button>
+          </Link>
         </div>
       </div>
 
@@ -51,35 +57,12 @@ const MT5Documentation = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="#authentication" className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-                    Authentication
+                  <a href="#Howtouse" className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
+                    How to use
                     <ChevronRight className="h-4 w-4" />
                   </a>
                 </li>
-                <li>
-                  <a href="#api-reference" className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-                    API Reference
-                    <ChevronRight className="h-4 w-4" />
-                  </a>
-                </li>
-                <li>
-                  <a href="#examples" className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-                    Examples
-                    <ChevronRight className="h-4 w-4" />
-                  </a>
-                </li>
-                <li>
-                  <a href="#troubleshooting" className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-                    Troubleshooting
-                    <ChevronRight className="h-4 w-4" />
-                  </a>
-                </li>
-                <li>
-                  <a href="#faq" className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-                    FAQ
-                    <ChevronRight className="h-4 w-4" />
-                  </a>
-                </li>
+
               </ul>
             </nav>
           </div>
@@ -95,7 +78,7 @@ const MT5Documentation = () => {
                 <h2 className="text-xl font-bold">Getting Started</h2>
               </div>
               <p className="text-gray-600 mb-4">
-                The MT5 API allows you to connect your trading platform with our service. 
+                The MT5 API allows you to connect your trading platform with our service.
                 This documentation will guide you through the installation and setup process.
               </p>
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md">
@@ -118,11 +101,17 @@ const MT5Documentation = () => {
               </p>
               <ol className="list-decimal pl-5 space-y-3">
                 <li>Download the API package from the button above</li>
-                <li>Extract the contents to a temporary folder</li>
+                <li>Extract the contents and You will see 2 folder <Image className="mt-3" src="/Extract.jpg" alt="Extract Image" width={1000} height={2000} /></li>
+
                 <li>Open your MT5 platform</li>
-                <li>Navigate to File &gt; Open Data Folder</li>
-                <li>Open the MQL5 folder, then the Libraries folder</li>
-                <li>Copy the extracted library files to this folder</li>
+                <li>Navigate to File &gt; Open Data Folder<Image className="mt-3" src="/Opendata.jpg" alt="Opendata Image" width={200} height={500} /></li>
+                <li>Open the MQL5 folder , then the Libraries folder</li>
+                <li>Copy the extracted library files to this folder<Image className="mt-3" src="/copylibrary.jpg" alt="copylibrary Image" width={1000} height={2000} /></li>
+
+                <li>Go Back Navigate to File &gt; Experts and put Expert Advisor (Rotrade_web.ex5) from extracted folder to Experts folder<Image className="mt-3" src="/Expert.jpg" alt="Expert advisor Image" width={1000} height={2000} />
+                  <Image className="mt-3" src="/Expert2.jpg" alt="Expert advisor2 Image" width={1000} height={2000} />
+                </li>
+
                 <li>Restart your MT5 platform</li>
               </ol>
             </section>
@@ -130,59 +119,32 @@ const MT5Documentation = () => {
             {/* Code Example */}
             <section id="api-reference" className="bg-white border border-gray-200 p-6 rounded-lg">
               <div className="flex items-center gap-2 mb-4">
-                <Code className="h-5 w-5 text-blue-600" />
-                <h2 className="text-xl font-bold">API Reference</h2>
+                <h2 className="text-xl font-bold">Allow Permission</h2>
               </div>
               <p className="text-gray-600 mb-4">
-                Here's a sample of how to initialize the API connection:
+                You need to allow the permission for the Expert Advisor to work properly.:
               </p>
-              <div className="relative bg-gray-900 text-gray-100 p-4 rounded-md mb-3">
-                <button className="absolute top-2 right-2 bg-gray-700 p-1 rounded hover:bg-gray-600">
-                  <Copy className="h-4 w-4" />
-                </button>
-                <pre className="text-sm overflow-x-auto">
-                  <code>
-{`// Initialize the MT5 API connection
-#include <MT5Api.mqh>
-
-int OnInit()
-{
-    string token = "YOUR_GENERATED_TOKEN";
-    bool connected = MT5Api::Initialize(token);
-    
-    if(connected)
-    {
-        Print("Successfully connected to API service");
-        return(INIT_SUCCEEDED);
-    }
-    else
-    {
-        Print("Failed to connect to API service");
-        return(INIT_FAILED);
-    }
-}`}
-                  </code>
-                </pre>
-              </div>
+              
               <p className="text-sm text-gray-500">
-                Replace YOUR_GENERATED_TOKEN with the token generated from your account dashboard.
+                Goto Tools {'->'} Options {'->'} Expert Advisor Tab.
               </p>
             </section>
 
             {/* Authentication */}
-            <section id="authentication" className="bg-white border border-gray-200 p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Authentication</h2>
+            <section id="Howtouse" className="bg-white border border-gray-200 p-6 rounded-lg scroll-mt-20">
+              <h2 className="text-xl font-bold mb-4">How to Use</h2>
               <p className="text-gray-600 mb-4">
-                To authenticate your API connection, you'll need to generate a token from your account dashboard.
+                To authenticate your API connection, you&apos;ll need to generate a token from your account dashboard.
                 Follow these steps:
               </p>
               <ul className="list-disc pl-5 space-y-2">
                 <li>Log in to your account</li>
                 <li>Navigate to the MT5 Accounts section</li>
-                <li>Click "Add MT5 Account"</li>
+                <li>Click &quot;Add MT5 Account&quot;</li>
                 <li>Enter your MT5 ID and Name</li>
-                <li>Click "Generate Token"</li>
-                <li>Use this token in your API initialization code</li>
+                <li>Click &quot;Generate Token&quot;</li>
+                <li>Use this token in your API initialization code <Image className="mt-3" src="/token.jpg" alt="Token Image" width={1000} height={2000} /></li>
+                <li>Click Check &quot;Allow DLL imports&quot; And Click &quot;OK&quot; to save changes<Image className="mt-3" src="/Dll.jpg" alt="Dll Image" width={1000} height={2000} /></li>
               </ul>
               <div className="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r">
                 <p className="text-sm text-yellow-800">
@@ -190,28 +152,6 @@ int OnInit()
                   or expose it in public repositories.
                 </p>
               </div>
-            </section>
-
-            {/* Add more sections as needed */}
-            <section id="examples" className="bg-white border border-gray-200 p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Examples</h2>
-              <p className="text-gray-600">
-                Add your examples here...
-              </p>
-            </section>
-
-            <section id="troubleshooting" className="bg-white border border-gray-200 p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Troubleshooting</h2>
-              <p className="text-gray-600">
-                Add your troubleshooting guide here...
-              </p>
-            </section>
-
-            <section id="faq" className="bg-white border border-gray-200 p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Frequently Asked Questions</h2>
-              <p className="text-gray-600">
-                Add your FAQ content here...
-              </p>
             </section>
           </div>
         </div>

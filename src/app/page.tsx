@@ -10,7 +10,8 @@ import { useEffect, useState } from 'react';
 import { TradingViewEURUSDMiniChart, TradingViewGBPUSDMiniChart, TradingViewUSDJPYMiniChart } from '@/components/tradingViewXAUmini';
 
 
-export default  function Home() {
+
+export default function Home() {
   // Client-side session handling
   const { data: session } = useSession();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -33,7 +34,7 @@ export default  function Home() {
       acc[pair].push(item);
       return acc;
     }, {});
-    
+
     // Find the model with the highest winrate for each pair
     const bestModels = Object.keys(groupedData).map(pair => {
       const bestModel = groupedData[pair].reduce((max: { winrate: number; }, item: { winrate: number; }) => (item.winrate > max.winrate ? item : max), groupedData[pair][0]);
@@ -47,7 +48,7 @@ export default  function Home() {
     setBest3model(sortedBestModels);
     console.log("data", sortedBestModels);
   }
-  
+
   useEffect(() => {
     fetchallmodel();
     setIsLoaded(true);
@@ -96,7 +97,9 @@ export default  function Home() {
                 <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                   Hello, <span className="text-green-400">{session.user.name}</span>
                 </h2>
-              ) : <div className="h-12 w-48 bg-gray-700 animate-pulse rounded-md mb-6"></div>}
+              ) : <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+                Hello, <span className="text-green-400">Guest</span>
+              </h2>}
               <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
                 Automate Your <span className="text-green-400">Forex Trading</span> With Powerful AI
               </h1>
@@ -129,7 +132,7 @@ export default  function Home() {
               <div>
                 <h1 className="text-white text-2xl font-bold ">GBP/USD Chart</h1>
                 <div className="relative h-56 overflow-hidden">
-                  <TradingViewGBPUSDMiniChart/>
+                  <TradingViewGBPUSDMiniChart />
                 </div>
               </div>
               <div>
@@ -210,7 +213,7 @@ export default  function Home() {
               <h3 className="text-xl font-semibold text-white mb-3">Cost Effective</h3>
               <p className="text-gray-300">
                 You pay only 10% of the profit you make. There are no hidden fees or commissions.
-                And if there is no profit, we don't charge any money.
+                And if there is no profit, we don&apos;t charge any money.
               </p>
             </div>
 
@@ -256,7 +259,7 @@ export default  function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            
+
 
             <div className="bg-blue-800/30 backdrop-blur-sm p-8 rounded-xl border border-blue-700/50 relative">
               <div className="absolute -top-4 -left-4 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
@@ -306,7 +309,7 @@ export default  function Home() {
               </div>
               <div className="space-y-4">
                 <p className="text-gray-300">
-                GBP/USD trading bot is designed for short-term trades on a 15-minute timeframe. use Robot to identify key market patterns and trends combine with Portfolio data, 
+                  GBP/USD trading bot is designed for short-term trades on a 15-minute timeframe. use Robot to identify key market patterns and trends combine with Portfolio data,
                 </p>
                 <div className="pt-4 border-t border-blue-700">
                   <div className="flex justify-between text-sm">
@@ -404,12 +407,12 @@ export default  function Home() {
                   >
                     Get Started Now
                   </a>
-                 
+
                 </div>
               </div>
               <div className="hidden md:block text-right">
                 <div className="inline-block bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
-                  <p className="text-5xl font-bold text-white">{(best3model[0]?.bestModel.winrate +best3model[1]?.bestModel.winrate +best3model[2]?.bestModel.winrate )/3}%</p>
+                  <p className="text-5xl font-bold text-white">{(best3model[0]?.bestModel.winrate + best3model[1]?.bestModel.winrate + best3model[2]?.bestModel.winrate) / 3}%</p>
                   <p className="text-xl text-white mt-2">Average Winrate</p>
                   <p className="text-white/70 text-sm mt-2">Based on our top 3 models</p>
                 </div>

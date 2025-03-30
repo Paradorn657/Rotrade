@@ -16,7 +16,7 @@ import { Bills } from "@prisma/client";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js/auto';
 import { randomBytes } from "crypto";
 import { Clipboard } from "flowbite-react";
-import { AlertTriangle, Award, BarChart2, Clock, Download, ExternalLink, Info, Percent, RefreshCcw, Sparkles, Trash2, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Award, BarChart2, Clock, Download, ExternalLink, Percent, RefreshCcw, Sparkles, Trash2, TrendingUp } from 'lucide-react';
 import { Session } from "next-auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -571,7 +571,7 @@ const MT5Dashboard = ({ session }: { session: Session }) => {
                         </p>
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
-                        Save this token securely. You'll need it to connect your MT5 account.
+                        Save this token securely. You&apos;ll need it to connect your MT5 account.
                       </p>
                     </div>
                     <SheetFooter>
