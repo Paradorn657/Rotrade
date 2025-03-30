@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       const currentEnd = new Date(currentStart);
       // เพิ่มเวลา 1 นาทีในรูปแบบ UTC
       // currentEnd.setUTCMinutes(currentEnd.getUTCMinutes() + 1);
-      currentEnd.setUTCDate(currentEnd.getUTCDate() + 7);
+      currentEnd.setUTCDate(currentEnd.getUTCDate() + 15);
 
       if (currentEnd > maxDate) {
         console.log('currentEnd > maxDate', maxDate.toISOString(), " - ", currentEnd.toISOString());

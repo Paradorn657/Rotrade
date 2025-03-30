@@ -38,7 +38,15 @@ export async function GET(req: NextRequest) {
           .map((bill) => ({
             id: bill.Bill_id,
             amount: bill.Balance,
-            date: formatDate(bill.Billing_startdate),
+            date: new Date(bill.Billing_startdate).toLocaleString('th-TH', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hourCycle: 'h23', // ใช้ระบบ 24 ชั่วโมง
+            }),
             description: `Bill #INV-${bill.Bill_id}`,
           })),
         paid: bills

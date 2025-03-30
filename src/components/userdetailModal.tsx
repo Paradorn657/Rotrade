@@ -264,7 +264,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ isOpen, setIsOpen, 
                                                             <div className="flex items-center gap-3 mt-1">
                                                                 <div className="flex items-center gap-1 text-gray-500">
                                                                     <Calendar className="w-3 h-3" />
-                                                                    <span className="text-xs">Created on {bill.date}</span>
+                                                                    <span className="text-xs">เริ่มเมื่อวันที่ {bill.date} น.</span>
                                                                 </div>
                                                             </div>
                                                         </div>
