@@ -104,7 +104,7 @@ export default function Home() {
                 Automate Your <span className="text-green-400">Forex Trading</span> With Powerful AI
               </h1>
               <p className="mt-6 text-xl text-gray-300">
-                Rent professional trading models and algorithms designed to maximize profits and minimize risk in the Forex market.
+                Use first Pay later{","} We provide trading bots designed to maximize profits and minimize risk in the Forex market.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <a
@@ -163,7 +163,7 @@ export default function Home() {
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-white">3 Popular</p>
-              <p className="text-gray-300 mt-1">Trading forex Models</p>
+              <p className="text-gray-300 mt-1">Trading forex Pair models</p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-white">Newly updated</p>
@@ -181,7 +181,7 @@ export default function Home() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white">Why Choose RoTrade?</h2>
             <p className="mt-4 text-xl text-gray-300 max-w-3xl mx-auto">
-              Our platform offers powerful tools and models to help you succeed in the forex market
+              Our platform offers powerful Robots You Dont need to pay if you dont make profit
             </p>
           </div>
 
@@ -412,7 +412,7 @@ export default function Home() {
               </div>
               <div className="hidden md:block text-right">
                 <div className="inline-block bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
-                  <p className="text-5xl font-bold text-white">{(best3model[0]?.bestModel.winrate + best3model[1]?.bestModel.winrate + best3model[2]?.bestModel.winrate) / 3}%</p>
+                  <p className="text-5xl font-bold text-white">{((best3model[0]?.bestModel.winrate + best3model[1]?.bestModel.winrate + best3model[2]?.bestModel.winrate) / 3).toFixed(2)}%</p>
                   <p className="text-xl text-white mt-2">Average Winrate</p>
                   <p className="text-white/70 text-sm mt-2">Based on our top 3 models</p>
                 </div>
